@@ -38,6 +38,22 @@ function formatDate(value) {
   }).format(date);
 }
 
+function formatDuration(seconds) {
+  const totalSeconds = Number(seconds || 0);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+  if (hours === 0) {
+    return `${minutes}m`;
+  }
+
+  if (minutes === 0) {
+    return `${hours}h`;
+  }
+
+  return `${hours}h ${minutes}m`;
+}
+
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
   statusEl.classList.toggle("error", isError);
@@ -57,7 +73,7 @@ function renderTable(participants) {
           <td>${participant.email || "-"}</td>
           <td>${formatDate(participant.joinTime)}</td>
           <td>${formatDate(participant.leaveTime)}</td>
-          <td>${participant.durationMinutes || 0}</td>
+          <td>${formatDuration(participant.durationMinutes)}</td>
           <td>${participant.attentivenessScore || "-"}</td>
           <td>${participant.status || "-"}</td>
         </tr>

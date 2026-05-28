@@ -39,6 +39,28 @@ function formatDate(value) {
   }).format(date);
 }
 
+function parseOffsetTimeToAbsolute(webinarStartTime, offsetTime) {
+  if (!webinarStartTime || !offsetTime) {
+    return offsetTime || "-";
+  }
+
+  const startDate = new Date(webinarStartTime);
+  if (Number.isNaN(startDate.getTime())) {
+    return offsetTime;
+  }
+
+  const match = String(offsetTime).match(/^(\d{2}):(\d{2}):(\d{2})$/);
+  if (!match) {
+    return offsetTime;
+  }
+
+  const [, hours, minutes, seconds] = match;
+  const totalSeconds =
+    Number(hours) * 3600 + Number(minutes) * 60 + Number(seconds);
+  const absoluteDate = new Date(startDate.getTime() + totalSeconds * 1000);
+  return formatDate(absoluteDate.toISOString());
+}
+
 function formatDuration(seconds) {
   const totalSeconds = Number(seconds || 0);
   const hours = Math.floor(totalSeconds / 3600);
@@ -96,7 +118,7 @@ function renderTable(participants) {
     .join("");
 }
 
-function renderAttendeeComments(uniqueAttendees) {
+function renderAttendeeComments(uniqueAttendees, webinarStartTime) {
   if (!attendeeCommentsEl) {
     return;
   }
@@ -114,7 +136,7 @@ function renderAttendeeComments(uniqueAttendees) {
             .map(
               (comment) => `
                 <li class="comment-item">
-                  <span class="comment-time">${escapeHtml(comment.time)}</span>
+                  <span class="comment-time">${escapeHtml(parseOffsetTimeToAbsolute(webinarStartTime, comment.time))}</span>
                   <p>${escapeHtml(comment.message).replaceAll("\n", "<br />")}</p>
                 </li>
               `
@@ -167,7 +189,7 @@ function render(payload) {
     csvLink.classList.remove("hidden");
   }
   renderTable(participants);
-  renderAttendeeComments(attendeeComments);
+  renderAttendeeComments(attendeeComments, payload.webinar.startTime);
   setStatus(`Loaded ${uniqueAttendees} unique attendees from ${participants.length} Zoom session records for webinar ${payload.webinar.id}.`);
 }
 

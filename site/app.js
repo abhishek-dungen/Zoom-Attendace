@@ -60,12 +60,16 @@ function setStatus(message, isError = false) {
 }
 
 function renderTable(participants) {
-  if (!participants.length) {
+  const sortedParticipants = [...participants].sort(
+    (left, right) => Number(right.durationMinutes || 0) - Number(left.durationMinutes || 0)
+  );
+
+  if (!sortedParticipants.length) {
     resultsBody.innerHTML = '<tr><td colspan="7" class="empty">No participants found in the latest published file.</td></tr>';
     return;
   }
 
-  resultsBody.innerHTML = participants
+  resultsBody.innerHTML = sortedParticipants
     .map(
       (participant) => `
         <tr>

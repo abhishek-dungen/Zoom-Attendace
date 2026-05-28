@@ -1,0 +1,13 @@
+{
+  "name": "zoom-attendance-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GitHub Pages site and workflows for publishing Zoom webinar attendance details.",
+  "type": "module",
+  "scripts": {
+    "fetch:attendance": "node scripts/fetch-attendance.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1"
+  }
+}

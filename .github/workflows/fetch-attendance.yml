@@ -1,0 +1,46 @@
+name: Fetch Zoom Attendance
+
+on:
+  workflow_dispatch:
+    inputs:
+      webinar_id:
+        description: Zoom webinar ID to fetch
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch webinar attendance
+        env:
+          ZOOM_ACCOUNT_ID: ${{ secrets.ZOOM_ACCOUNT_ID }}
+          ZOOM_CLIENT_ID: ${{ secrets.ZOOM_CLIENT_ID }}
+          ZOOM_CLIENT_SECRET: ${{ secrets.ZOOM_CLIENT_SECRET }}
+          WEBINAR_ID: ${{ inputs.webinar_id }}
+        run: npm run fetch:attendance
+
+      - name: Commit generated attendance files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/data/latest.json site/data/latest.csv
+          git diff --cached --quiet && exit 0
+          git commit -m "Update Zoom attendance for webinar ${{ inputs.webinar_id }}"
+          git push

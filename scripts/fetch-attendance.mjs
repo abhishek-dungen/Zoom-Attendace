@@ -107,7 +107,9 @@ async function getParticipants(token, id) {
     nextPageToken = page.next_page_token || "";
   } while (nextPageToken);
 
-  return participants;
+  return participants.sort(
+    (left, right) => Number(right.durationMinutes || 0) - Number(left.durationMinutes || 0)
+  );
 }
 
 function buildCsvRows(rows) {

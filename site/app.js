@@ -71,12 +71,24 @@ function render(payload) {
   const uniqueAttendees = getUniqueAttendeeCount(participants);
 
   summary.classList.remove("hidden");
-  topicEl.textContent = payload.webinar.topic || "-";
-  webinarIdEl.textContent = payload.webinar.id || "-";
-  uniqueAttendeesEl.textContent = String(uniqueAttendees);
-  sessionRecordsEl.textContent = String(participants.length);
-  generatedAtEl.textContent = formatDate(payload.generatedAt);
-  csvLink.classList.remove("hidden");
+  if (topicEl) {
+    topicEl.textContent = payload.webinar.topic || "-";
+  }
+  if (webinarIdEl) {
+    webinarIdEl.textContent = payload.webinar.id || "-";
+  }
+  if (uniqueAttendeesEl) {
+    uniqueAttendeesEl.textContent = String(uniqueAttendees);
+  }
+  if (sessionRecordsEl) {
+    sessionRecordsEl.textContent = String(participants.length);
+  }
+  if (generatedAtEl) {
+    generatedAtEl.textContent = formatDate(payload.generatedAt);
+  }
+  if (csvLink) {
+    csvLink.classList.remove("hidden");
+  }
   renderTable(participants);
   setStatus(`Loaded ${uniqueAttendees} unique attendees from ${participants.length} Zoom session records for webinar ${payload.webinar.id}.`);
 }

@@ -2,6 +2,7 @@ const summary = document.getElementById("summary");
 const statusEl = document.getElementById("status");
 const csvLink = document.getElementById("csvLink");
 const resultsBody = document.getElementById("resultsBody");
+const attendeeCommentsEl = document.getElementById("attendeeComments");
 
 const topicEl = document.getElementById("topic");
 const webinarIdEl = document.getElementById("webinarId");
@@ -54,6 +55,15 @@ function formatDuration(seconds) {
   return `${hours}h ${minutes}m`;
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
   statusEl.classList.toggle("error", isError);
@@ -86,9 +96,56 @@ function renderTable(participants) {
     .join("");
 }
 
+function renderAttendeeComments(uniqueAttendees) {
+  if (!attendeeCommentsEl) {
+    return;
+  }
+
+  if (!uniqueAttendees.length) {
+    attendeeCommentsEl.innerHTML = '<p class="empty">No attendee chat data published yet.</p>';
+    return;
+  }
+
+  attendeeCommentsEl.innerHTML = uniqueAttendees
+    .map((attendee) => {
+      const comments = attendee.chatComments || [];
+      const commentsHtml = comments.length
+        ? comments
+            .map(
+              (comment) => `
+                <li class="comment-item">
+                  <span class="comment-time">${escapeHtml(comment.time)}</span>
+                  <p>${escapeHtml(comment.message).replaceAll("\n", "<br />")}</p>
+                </li>
+              `
+            )
+            .join("")
+        : '<li class="comment-item empty-comment">No saved chat comments.</li>';
+
+      return `
+        <article class="attendee-card">
+          <div class="attendee-card-head">
+            <div>
+              <h3>${escapeHtml(attendee.name || "Unknown attendee")}</h3>
+              <p>${escapeHtml(attendee.email || "No email")}</p>
+            </div>
+            <div class="attendee-meta">
+              <span>${attendee.joins} joins</span>
+              <span>${formatDuration(attendee.totalDurationSeconds)}</span>
+              <span>${attendee.chatCommentsCount || 0} comments</span>
+            </div>
+          </div>
+          <ul class="comment-list">${commentsHtml}</ul>
+        </article>
+      `;
+    })
+    .join("");
+}
+
 function render(payload) {
   const participants = payload.participants || [];
   const uniqueAttendees = getUniqueAttendeeCount(participants);
+  const attendeeComments = payload.uniqueAttendees || [];
 
   summary.classList.remove("hidden");
   if (topicEl) {
@@ -110,6 +167,7 @@ function render(payload) {
     csvLink.classList.remove("hidden");
   }
   renderTable(participants);
+  renderAttendeeComments(attendeeComments);
   setStatus(`Loaded ${uniqueAttendees} unique attendees from ${participants.length} Zoom session records for webinar ${payload.webinar.id}.`);
 }
 

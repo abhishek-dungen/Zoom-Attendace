@@ -88,6 +88,28 @@ function normalizeParticipant(participant = {}) {
   };
 }
 
+function normalizeText(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function attendeeKeyFromParticipant(participant = {}) {
+  const email = normalizeText(participant.email);
+  if (email) {
+    return `email:${email}`;
+  }
+
+  return `name:${normalizeText(participant.name)}`;
+}
+
+function attendeeKeyFromIdentity(name = "", email = "") {
+  const normalizedEmail = normalizeText(email);
+  if (normalizedEmail) {
+    return `email:${normalizedEmail}`;
+  }
+
+  return `name:${normalizeText(name)}`;
+}
+
 async function getParticipants(token, id) {
   const participants = [];
   let nextPageToken = "";
@@ -110,6 +132,132 @@ async function getParticipants(token, id) {
   return participants.sort(
     (left, right) => Number(right.durationMinutes || 0) - Number(left.durationMinutes || 0)
   );
+}
+
+async function getRecordingFiles(token, id) {
+  const data = await zoomRequest(token, `/meetings/${encodeURIComponent(id)}/recordings`);
+  return Array.isArray(data.recording_files) ? data.recording_files : [];
+}
+
+function parseChatTranscript(text) {
+  const entries = [];
+  const lines = String(text || "").replace(/\r\n/g, "\n").split("\n");
+  let current = null;
+
+  const pushCurrent = () => {
+    if (!current) {
+      return;
+    }
+
+    current.message = current.message.trim();
+    if (current.message) {
+      entries.push(current);
+    }
+    current = null;
+  };
+
+  for (const line of lines) {
+    const match = line.match(/^(\d{2}:\d{2}:\d{2})\t([^:]+):\t?(.*)$/);
+    if (match) {
+      pushCurrent();
+      current = {
+        time: match[1],
+        senderName: match[2].trim(),
+        message: match[3] || "",
+      };
+      continue;
+    }
+
+    if (!current) {
+      continue;
+    }
+
+    current.message += current.message ? `\n${line}` : line;
+  }
+
+  pushCurrent();
+  return entries;
+}
+
+async function getChatMessages(token, id) {
+  const recordingFiles = await getRecordingFiles(token, id);
+  const chatFile = recordingFiles.find((file) => file.file_type === "CHAT" && file.download_url);
+  if (!chatFile) {
+    return [];
+  }
+
+  const response = await fetch(chatFile.download_url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const text = await response.text();
+  if (!response.ok) {
+    fail(`Failed to download webinar chat transcript: ${text}`);
+  }
+
+  return parseChatTranscript(text);
+}
+
+function buildUniqueAttendees(participants, chatMessages) {
+  const attendeeMap = new Map();
+
+  for (const participant of participants) {
+    const key = attendeeKeyFromParticipant(participant);
+    if (!attendeeMap.has(key)) {
+      attendeeMap.set(key, {
+        key,
+        name: participant.name || "",
+        email: participant.email || "",
+        joins: 0,
+        totalDurationSeconds: 0,
+        chatComments: [],
+      });
+    }
+
+    const attendee = attendeeMap.get(key);
+    attendee.joins += 1;
+    attendee.totalDurationSeconds += Number(participant.durationMinutes || 0);
+  }
+
+  const nameOnlyIndex = new Map();
+  for (const attendee of attendeeMap.values()) {
+    const nameKey = normalizeText(attendee.name);
+    if (nameKey && !nameOnlyIndex.has(nameKey)) {
+      nameOnlyIndex.set(nameKey, attendee);
+    }
+  }
+
+  for (const message of chatMessages) {
+    const nameKey = normalizeText(message.senderName);
+    const attendee =
+      attendeeMap.get(attendeeKeyFromIdentity(message.senderName)) ||
+      nameOnlyIndex.get(nameKey);
+
+    if (!attendee) {
+      continue;
+    }
+
+    attendee.chatComments.push({
+      time: message.time,
+      message: message.message,
+    });
+  }
+
+  return [...attendeeMap.values()]
+    .sort((left, right) => {
+      const durationDelta = right.totalDurationSeconds - left.totalDurationSeconds;
+      if (durationDelta !== 0) {
+        return durationDelta;
+      }
+
+      return left.name.localeCompare(right.name);
+    })
+    .map((attendee) => ({
+      ...attendee,
+      chatCommentsCount: attendee.chatComments.length,
+    }));
 }
 
 function buildCsvRows(rows) {
@@ -156,6 +304,8 @@ async function main() {
   const token = await getAccessToken();
   const webinar = await zoomRequest(token, `/report/webinars/${encodeURIComponent(webinarId)}`);
   const participants = await getParticipants(token, webinarId);
+  const chatMessages = await getChatMessages(token, webinarId);
+  const uniqueAttendees = buildUniqueAttendees(participants, chatMessages);
   const totalDurationMinutes = participants.reduce((sum, row) => sum + row.durationMinutes, 0);
 
   const payload = {
@@ -178,7 +328,12 @@ async function main() {
         ? Number((totalDurationMinutes / participants.length).toFixed(2))
         : 0,
     },
+    chatSummary: {
+      totalChatMessages: chatMessages.length,
+      attendeesWithChatComments: uniqueAttendees.filter((attendee) => attendee.chatCommentsCount > 0).length,
+    },
     participants,
+    uniqueAttendees,
   };
 
   await writeOutputs(payload);

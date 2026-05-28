@@ -126,6 +126,20 @@ h1 {
   margin-top: 24px;
 }
 
+.section-head {
+  margin-bottom: 18px;
+}
+
+.section-head h2 {
+  margin: 0 0 6px;
+  font-size: 1.5rem;
+}
+
+.section-head p {
+  margin: 0;
+  color: var(--muted);
+}
+
 .table-wrap {
   overflow-x: auto;
 }
@@ -154,6 +168,85 @@ th {
   color: var(--muted);
   text-align: center;
   padding: 28px;
+}
+
+.attendee-comments {
+  display: grid;
+  gap: 16px;
+}
+
+.attendee-card {
+  border: 1px solid rgba(68, 43, 18, 0.08);
+  border-radius: 20px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.attendee-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.attendee-card-head h3 {
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+}
+
+.attendee-card-head p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.attendee-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.attendee-meta span {
+  background: rgba(154, 52, 18, 0.08);
+  color: var(--accent-dark);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+.comment-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.comment-item {
+  border-top: 1px solid rgba(68, 43, 18, 0.08);
+  padding-top: 10px;
+}
+
+.comment-item:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.comment-item p {
+  margin: 6px 0 0;
+  line-height: 1.5;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.comment-time {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.empty-comment {
+  color: var(--muted);
 }
 
 .hidden {

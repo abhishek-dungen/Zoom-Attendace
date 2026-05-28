@@ -5,8 +5,22 @@ const resultsBody = document.getElementById("resultsBody");
 
 const topicEl = document.getElementById("topic");
 const webinarIdEl = document.getElementById("webinarId");
-const attendeesEl = document.getElementById("attendees");
+const uniqueAttendeesEl = document.getElementById("uniqueAttendees");
+const sessionRecordsEl = document.getElementById("sessionRecords");
 const generatedAtEl = document.getElementById("generatedAt");
+
+function getUniqueAttendeeCount(participants) {
+  const seen = new Set();
+
+  for (const participant of participants) {
+    const email = (participant.email || "").trim().toLowerCase();
+    const name = (participant.name || "").trim().toLowerCase();
+    const key = email || `name:${name}`;
+    seen.add(key);
+  }
+
+  return seen.size;
+}
 
 function formatDate(value) {
   if (!value) {
@@ -53,14 +67,18 @@ function renderTable(participants) {
 }
 
 function render(payload) {
+  const participants = payload.participants || [];
+  const uniqueAttendees = getUniqueAttendeeCount(participants);
+
   summary.classList.remove("hidden");
   topicEl.textContent = payload.webinar.topic || "-";
   webinarIdEl.textContent = payload.webinar.id || "-";
-  attendeesEl.textContent = String(payload.summary.attendees || 0);
+  uniqueAttendeesEl.textContent = String(uniqueAttendees);
+  sessionRecordsEl.textContent = String(participants.length);
   generatedAtEl.textContent = formatDate(payload.generatedAt);
   csvLink.classList.remove("hidden");
-  renderTable(payload.participants || []);
-  setStatus(`Loaded attendance for webinar ${payload.webinar.id}.`);
+  renderTable(participants);
+  setStatus(`Loaded ${uniqueAttendees} unique attendees from ${participants.length} Zoom session records for webinar ${payload.webinar.id}.`);
 }
 
 async function loadAttendance() {

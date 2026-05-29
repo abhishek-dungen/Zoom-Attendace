@@ -37,11 +37,9 @@ jobs:
       - name: Back up reports to Firebase
         env:
           FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
-          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
-          FIREBASE_STORAGE_PREFIX: zoom-attendance
         run: |
-          if [ -z "$FIREBASE_SERVICE_ACCOUNT_KEY" ] || [ -z "$FIREBASE_STORAGE_BUCKET" ]; then
-            echo "Firebase secrets not configured. Skipping Firebase backup."
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT_KEY" ]; then
+            echo "Firebase service account not configured. Skipping Firebase backup."
             exit 0
           fi
           npm run backup:firebase

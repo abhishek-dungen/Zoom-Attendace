@@ -1,10 +1,8 @@
 const istTimeZone = "Asia/Kolkata";
 
-const statusEl = document.getElementById("status");
-const topicEl = document.getElementById("topic");
-const webinarIdEl = document.getElementById("webinarId");
+const webinarSelectEl = document.getElementById("webinarSelect");
 const uniqueParticipantsEl = document.getElementById("uniqueParticipants");
-const sessionRecordsEl = document.getElementById("sessionRecords");
+const webinarDateEl = document.getElementById("webinarDate");
 const courseRevealTimeEl = document.getElementById("courseRevealTime");
 const effectiveDurationEl = document.getElementById("effectiveDuration");
 const droppedBeforeCourseMetricEl = document.getElementById("droppedBeforeCourseMetric");
@@ -12,13 +10,14 @@ const droppedAfterCourseMetricEl = document.getElementById("droppedAfterCourseMe
 const stayedTillEndMetricEl = document.getElementById("stayedTillEndMetric");
 const effectiveWindowTextEl = document.getElementById("effectiveWindowText");
 const courseRevealSourceEl = document.getElementById("courseRevealSource");
-const generatedAtEl = document.getElementById("generatedAt");
 const chatAvailabilityEl = document.getElementById("chatAvailability");
-const methodologyListEl = document.getElementById("methodologyList");
 const uniqueParticipantsTableEl = document.getElementById("uniqueParticipantsTable");
 const beforeCourseTableEl = document.getElementById("beforeCourseTable");
 const afterCourseTableEl = document.getElementById("afterCourseTable");
 const stayedTillEndTableEl = document.getElementById("stayedTillEndTable");
+const tileButtons = [...document.querySelectorAll(".tile-button")];
+
+let webinarManifest = [];
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -46,6 +45,24 @@ function formatDateIst(value) {
   }).format(date);
 }
 
+function formatDateOnlyIst(value) {
+  if (!value) {
+    return "-";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: istTimeZone,
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
 function formatDuration(seconds) {
   const totalSeconds = Math.max(0, Number(seconds || 0));
   const hours = Math.floor(totalSeconds / 3600);
@@ -64,11 +81,6 @@ function formatDuration(seconds) {
 
 function formatPercent(value) {
   return `${Number(value || 0).toFixed(2)}%`;
-}
-
-function setStatus(message, isError = false) {
-  statusEl.textContent = message;
-  statusEl.classList.toggle("error", isError);
 }
 
 function renderMetricText(element, count, percent) {
@@ -148,26 +160,9 @@ function renderTables(payload) {
   );
 }
 
-function renderMethodology(payload) {
-  const methodologyItems = [
-    payload.methodology?.webinarLengthRule,
-    payload.methodology?.courseRevealRule,
-    payload.methodology?.stayedTillEndRule,
-    payload.courseReveal?.time
-      ? `Course reveal time used for this report: ${formatDateIst(payload.courseReveal.time)}.`
-      : "Course reveal time was not available.",
-  ].filter(Boolean);
-
-  methodologyListEl.innerHTML = methodologyItems
-    .map((item) => `<li>${escapeHtml(item)}</li>`)
-    .join("");
-}
-
 function renderSummary(payload) {
-  topicEl.textContent = payload.webinar?.topic || "-";
-  webinarIdEl.textContent = payload.webinar?.id || "-";
   uniqueParticipantsEl.textContent = String(payload.summary?.uniqueParticipants || 0);
-  sessionRecordsEl.textContent = String(payload.summary?.sessionRecords || 0);
+  webinarDateEl.textContent = formatDateOnlyIst(payload.webinar?.startTime);
   courseRevealTimeEl.textContent = formatDateIst(payload.courseReveal?.time);
   effectiveDurationEl.textContent = payload.effectiveWindow?.durationFormatted || "-";
 
@@ -192,20 +187,37 @@ function renderSummary(payload) {
     payload.courseReveal?.source === "admin_chat_detected"
       ? "Detected from admin chat"
       : "Fallback 8:40 PM IST";
-  generatedAtEl.textContent = formatDateIst(payload.generatedAt);
   chatAvailabilityEl.textContent = `${payload.chatSummary?.totalChatMessages || 0} chat messages, ${payload.chatSummary?.attendeesWithChatComments || 0} attendees with saved chat`;
 }
 
 function render(payload) {
   renderSummary(payload);
-  renderMethodology(payload);
   renderTables(payload);
-  setStatus(`Loaded webinar ${payload.webinar.id} with ${payload.summary.uniqueParticipants} unique participants.`);
 }
 
-async function loadReport() {
+async function loadManifest() {
+  const response = await fetch(`data/index.json?ts=${Date.now()}`);
+  if (!response.ok) {
+    throw new Error("No webinar manifest found.");
+  }
+
+  const payload = await response.json();
+  webinarManifest = payload.webinars || [];
+
+  webinarSelectEl.innerHTML = webinarManifest
+    .map(
+      (webinar) => `
+        <option value="${escapeHtml(webinar.reportJson)}">
+          ${escapeHtml(`${webinar.serial}. ${webinar.weekday} | ${webinar.date} | ${webinar.durationLabel}`)}
+        </option>
+      `
+    )
+    .join("");
+}
+
+async function loadReport(reportJsonPath) {
   try {
-    const response = await fetch(`data/latest.json?ts=${Date.now()}`);
+    const response = await fetch(`${reportJsonPath}?ts=${Date.now()}`);
     if (!response.ok) {
       throw new Error("No published webinar report found yet.");
     }
@@ -213,8 +225,32 @@ async function loadReport() {
     const payload = await response.json();
     render(payload);
   } catch (error) {
-    setStatus(error.message || "Failed to load webinar report.", true);
+    uniqueParticipantsTableEl.innerHTML = `<p class="empty">${escapeHtml(error.message || "Failed to load webinar report.")}</p>`;
   }
 }
 
-loadReport();
+function attachInteractions() {
+  webinarSelectEl.addEventListener("change", (event) => {
+    loadReport(event.target.value);
+  });
+
+  for (const button of tileButtons) {
+    button.addEventListener("click", () => {
+      const target = document.getElementById(button.dataset.target);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  }
+}
+
+async function init() {
+  await loadManifest();
+  attachInteractions();
+  if (webinarManifest[0]) {
+    webinarSelectEl.value = webinarManifest[0].reportJson;
+    await loadReport(webinarManifest[0].reportJson);
+  }
+}
+
+init();

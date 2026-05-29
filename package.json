@@ -5,7 +5,8 @@
   "description": "GitHub Pages site and workflows for publishing Zoom webinar attendance details.",
   "type": "module",
   "scripts": {
-    "fetch:attendance": "node scripts/fetch-attendance.mjs"
+    "fetch:attendance": "node scripts/fetch-attendance.mjs",
+    "sync:reports": "node scripts/sync-reports.mjs"
   },
   "dependencies": {
     "dotenv": "^16.6.1"

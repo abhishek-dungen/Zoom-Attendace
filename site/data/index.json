@@ -1,0 +1,68 @@
+{
+  "webinars": [
+    {
+      "serial": 1,
+      "webinarId": 89557058450,
+      "webinarUuid": "3V+lWnapSfiXdyR4QTYhGA==",
+      "basename": "2026-05-24-89557058450",
+      "topic": "Excel Career Masterclass - By Excel Bhaiya Abhishek",
+      "date": "24 May 2026",
+      "weekday": "Sunday",
+      "durationLabel": "1h 58m",
+      "startTime": "2026-05-24T13:05:18Z",
+      "reportJson": "data/2026-05-24-89557058450.json",
+      "uniqueCsv": "data/2026-05-24-89557058450.csv",
+      "beforeCourseCsv": "data/2026-05-24-89557058450-before-course.csv",
+      "afterCourseCsv": "data/2026-05-24-89557058450-after-course-30m.csv",
+      "stayedCsv": "data/2026-05-24-89557058450-stayed-till-end.csv"
+    },
+    {
+      "serial": 2,
+      "webinarId": 88583977339,
+      "webinarUuid": "Zx+z/Y1iRpyeDDUZ/vNEhg==",
+      "basename": "2026-05-17-88583977339",
+      "topic": "Excel Career Masterclass - By Excel Bhaiya Abhishek",
+      "date": "17 May 2026",
+      "weekday": "Sunday",
+      "durationLabel": "4h 50m",
+      "startTime": "2026-05-17T12:55:13Z",
+      "reportJson": "data/2026-05-17-88583977339.json",
+      "uniqueCsv": "data/2026-05-17-88583977339.csv",
+      "beforeCourseCsv": "data/2026-05-17-88583977339-before-course.csv",
+      "afterCourseCsv": "data/2026-05-17-88583977339-after-course-30m.csv",
+      "stayedCsv": "data/2026-05-17-88583977339-stayed-till-end.csv"
+    },
+    {
+      "serial": 3,
+      "webinarId": 89051688719,
+      "webinarUuid": "a5lkWUK/Saiaof9EmOKOfQ==",
+      "basename": "2026-05-10-89051688719",
+      "topic": "Excel Career Masterclass - By Excel Bhaiya Abhishek",
+      "date": "10 May 2026",
+      "weekday": "Sunday",
+      "durationLabel": "4h 51m",
+      "startTime": "2026-05-10T12:58:34Z",
+      "reportJson": "data/2026-05-10-89051688719.json",
+      "uniqueCsv": "data/2026-05-10-89051688719.csv",
+      "beforeCourseCsv": "data/2026-05-10-89051688719-before-course.csv",
+      "afterCourseCsv": "data/2026-05-10-89051688719-after-course-30m.csv",
+      "stayedCsv": "data/2026-05-10-89051688719-stayed-till-end.csv"
+    },
+    {
+      "serial": 4,
+      "webinarId": 89241608257,
+      "webinarUuid": "IervVWEdQmGt9CzYu60dqg==",
+      "basename": "2026-05-03-89241608257",
+      "topic": "Excel Career Masterclass - By Excel Bhaiya Abhishek",
+      "date": "3 May 2026",
+      "weekday": "Sunday",
+      "durationLabel": "4h 31m",
+      "startTime": "2026-05-03T13:08:18Z",
+      "reportJson": "data/2026-05-03-89241608257.json",
+      "uniqueCsv": "data/2026-05-03-89241608257.csv",
+      "beforeCourseCsv": "data/2026-05-03-89241608257-before-course.csv",
+      "afterCourseCsv": "data/2026-05-03-89241608257-after-course-30m.csv",
+      "stayedCsv": "data/2026-05-03-89241608257-stayed-till-end.csv"
+    }
+  ]
+}

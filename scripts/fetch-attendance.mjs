@@ -6,6 +6,7 @@ dotenv.config();
 
 const webinarId = process.env.WEBINAR_ID || process.argv[2];
 const webinarUuid = process.env.WEBINAR_UUID || process.argv[3] || "";
+const outputBasename = process.env.OUTPUT_BASENAME || "latest";
 const outputDir = path.resolve("site", "data");
 const istTimeZone = "Asia/Kolkata";
 const pitchWindowMinutes = 30;
@@ -654,18 +655,18 @@ function buildParticipantCsvRows(participants) {
 
 async function writeOutputs(payload) {
   await fs.mkdir(outputDir, { recursive: true });
-  await fs.writeFile(path.join(outputDir, "latest.json"), `${JSON.stringify(payload, null, 2)}\n`);
-  await fs.writeFile(path.join(outputDir, "latest.csv"), `${buildParticipantCsvRows(payload.uniqueParticipants)}\n`);
+  await fs.writeFile(path.join(outputDir, `${outputBasename}.json`), `${JSON.stringify(payload, null, 2)}\n`);
+  await fs.writeFile(path.join(outputDir, `${outputBasename}.csv`), `${buildParticipantCsvRows(payload.uniqueParticipants)}\n`);
   await fs.writeFile(
-    path.join(outputDir, "latest-before-course.csv"),
+    path.join(outputDir, `${outputBasename}-before-course.csv`),
     `${buildParticipantCsvRows(payload.cohorts.droppedBeforeCourse)}\n`
   );
   await fs.writeFile(
-    path.join(outputDir, "latest-after-course-30m.csv"),
+    path.join(outputDir, `${outputBasename}-after-course-30m.csv`),
     `${buildParticipantCsvRows(payload.cohorts.droppedDuringPitchWindow)}\n`
   );
   await fs.writeFile(
-    path.join(outputDir, "latest-stayed-till-end.csv"),
+    path.join(outputDir, `${outputBasename}-stayed-till-end.csv`),
     `${buildParticipantCsvRows(payload.cohorts.stayedTillEnd)}\n`
   );
 }

@@ -10,44 +10,38 @@
     <main class="page">
       <section class="hero">
         <p class="eyebrow">Zoom Webinar Analysis</p>
-        <h1>Participant retention and drop-off report</h1>
-        <p class="intro">
-          This page publishes a unique-participant webinar report with attendance percentages, course-reveal drop windows,
-          and stayed-till-end analysis.
-        </p>
+        <h1>Webinar retention analysis</h1>
+      </section>
+
+      <section class="panel selector-panel">
+        <label class="selector-label" for="webinarSelect">Choose webinar</label>
+        <select id="webinarSelect" class="selector-input">
+          <option>Loading webinars...</option>
+        </select>
       </section>
 
       <section class="summary" id="summary">
-        <article class="card">
-          <span>Topic</span>
-          <strong id="topic">-</strong>
-        </article>
-        <article class="card">
-          <span>Webinar ID</span>
-          <strong id="webinarId">-</strong>
-        </article>
         <article class="card">
           <span>Unique Participants</span>
           <strong id="uniqueParticipants">0</strong>
         </article>
         <article class="card">
-          <span>Session Records</span>
-          <strong id="sessionRecords">0</strong>
-        </article>
-        <article class="card">
-          <span>Course Reveal Time</span>
-          <strong id="courseRevealTime">-</strong>
+          <span>Webinar Date</span>
+          <strong id="webinarDate">-</strong>
         </article>
         <article class="card">
           <span>Effective Webinar Length</span>
           <strong id="effectiveDuration">-</strong>
+        </article>
+        <article class="card">
+          <span>Course Reveal Time</span>
+          <strong id="courseRevealTime">-</strong>
         </article>
       </section>
 
       <section class="panel metrics-panel">
         <div class="section-head">
           <h2>Retention Summary</h2>
-          <p id="status" class="status">Loading latest webinar analysis...</p>
         </div>
         <div class="metrics-grid">
           <article class="metric">
@@ -73,38 +67,22 @@
             <strong id="courseRevealSource">-</strong>
           </article>
           <article class="meta-card">
-            <span>Published</span>
-            <strong id="generatedAt">-</strong>
-          </article>
-          <article class="meta-card">
             <span>Chat availability</span>
             <strong id="chatAvailability">-</strong>
           </article>
         </div>
       </section>
 
-      <section class="panel methodology-panel">
-        <div class="section-head">
-          <h2>Methodology</h2>
-        </div>
-        <ul id="methodologyList" class="methodology-list">
-          <li>Loading methodology...</li>
-        </ul>
-      </section>
-
-      <section class="panel downloads-panel">
-        <div class="section-head">
-          <h2>Downloads</h2>
-        </div>
-        <div class="download-links">
-          <a class="button" href="data/latest.csv">Unique participants CSV</a>
-          <a class="button secondary" href="data/latest-before-course.csv">Dropped before course CSV</a>
-          <a class="button secondary" href="data/latest-after-course-30m.csv">Dropped in next 30 min CSV</a>
-          <a class="button secondary" href="data/latest-stayed-till-end.csv">Stayed till end CSV</a>
+      <section class="panel tiles-panel">
+        <div class="report-tiles">
+          <button class="tile-button" data-target="uniqueParticipantsSection" type="button">Unique participants list</button>
+          <button class="tile-button" data-target="beforeCourseSection" type="button">Dropped before course</button>
+          <button class="tile-button" data-target="afterCourseSection" type="button">Dropped in next 30 min</button>
+          <button class="tile-button" data-target="stayedTillEndSection" type="button">Stayed till end</button>
         </div>
       </section>
 
-      <section class="panel table-panel">
+      <section class="panel table-panel" id="uniqueParticipantsSection">
         <div class="section-head">
           <h2>Unique Participant List</h2>
           <p>Earliest join, final drop, effective presence duration, and attendance percentage.</p>
@@ -112,7 +90,7 @@
         <div class="table-wrap" id="uniqueParticipantsTable"></div>
       </section>
 
-      <section class="panel table-panel">
+      <section class="panel table-panel" id="beforeCourseSection">
         <div class="section-head">
           <h2>Dropped Before Course Reveal</h2>
           <p>Participants whose final drop time was before the detected or fallback course-reveal time.</p>
@@ -120,7 +98,7 @@
         <div class="table-wrap" id="beforeCourseTable"></div>
       </section>
 
-      <section class="panel table-panel">
+      <section class="panel table-panel" id="afterCourseSection">
         <div class="section-head">
           <h2>Dropped In The Next 30 Minutes</h2>
           <p>Participants whose final drop happened in the 30-minute pitch window after course reveal.</p>
@@ -128,7 +106,7 @@
         <div class="table-wrap" id="afterCourseTable"></div>
       </section>
 
-      <section class="panel table-panel">
+      <section class="panel table-panel" id="stayedTillEndSection">
         <div class="section-head">
           <h2>Stayed Till End</h2>
           <p>Participants whose final drop was within the configured stay-till-end tolerance window.</p>
@@ -137,6 +115,6 @@
       </section>
     </main>
 
-    <script type="module" src="app.js?v=20260529-3"></script>
+    <script type="module" src="app.js?v=20260529-4"></script>
   </body>
 </html>

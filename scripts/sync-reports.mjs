@@ -182,6 +182,54 @@ async function generateReport(entry) {
     beforeCourseCsv: `data/${basename}-before-course.csv`,
     afterCourseCsv: `data/${basename}-after-course-30m.csv`,
     stayedCsv: `data/${basename}-stayed-till-end.csv`,
+    summary: payload.summary,
+    effectiveDurationSeconds: payload.effectiveWindow?.durationSeconds || 0,
+    webinarDurationMinutes: payload.webinar.durationMinutes || 0,
+  };
+}
+
+function average(values) {
+  return values.length ? values.reduce((sum, value) => sum + Number(value || 0), 0) / values.length : 0;
+}
+
+function buildAggregate(manifest) {
+  const webinarsConsidered = manifest.length;
+  const totalUniqueParticipants = manifest.reduce((sum, webinar) => sum + Number(webinar.summary?.uniqueParticipants || 0), 0);
+  const totalDroppedBefore = manifest.reduce((sum, webinar) => sum + Number(webinar.summary?.droppedBeforeCourseCount || 0), 0);
+  const totalDroppedAfter = manifest.reduce((sum, webinar) => sum + Number(webinar.summary?.droppedDuringPitchWindowCount || 0), 0);
+  const totalStayed = manifest.reduce((sum, webinar) => sum + Number(webinar.summary?.stayedTillEndCount || 0), 0);
+
+  return {
+    webinarsConsidered,
+    averages: {
+      webinarLengthMinutes: Number(average(manifest.map((webinar) => webinar.webinarDurationMinutes)).toFixed(2)),
+      sessionRecords: Number(average(manifest.map((webinar) => webinar.summary?.sessionRecords || 0)).toFixed(2)),
+      uniqueParticipants: Number(average(manifest.map((webinar) => webinar.summary?.uniqueParticipants || 0)).toFixed(2)),
+      effectiveWebinarLengthSeconds: Number(average(manifest.map((webinar) => webinar.effectiveDurationSeconds || 0)).toFixed(2)),
+      droppedBeforeCourse: Number(average(manifest.map((webinar) => webinar.summary?.droppedBeforeCourseCount || 0)).toFixed(2)),
+      droppedDuringPitchWindow: Number(average(manifest.map((webinar) => webinar.summary?.droppedDuringPitchWindowCount || 0)).toFixed(2)),
+      stayedTillEnd: Number(average(manifest.map((webinar) => webinar.summary?.stayedTillEndCount || 0)).toFixed(2)),
+    },
+    aggregatePercentages: {
+      droppedBeforeCourse: totalUniqueParticipants ? Number(((totalDroppedBefore / totalUniqueParticipants) * 100).toFixed(2)) : 0,
+      droppedDuringPitchWindow: totalUniqueParticipants ? Number(((totalDroppedAfter / totalUniqueParticipants) * 100).toFixed(2)) : 0,
+      stayedTillEnd: totalUniqueParticipants ? Number(((totalStayed / totalUniqueParticipants) * 100).toFixed(2)) : 0,
+    },
+    totals: {
+      uniqueParticipants: totalUniqueParticipants,
+      droppedBeforeCourse: totalDroppedBefore,
+      droppedDuringPitchWindow: totalDroppedAfter,
+      stayedTillEnd: totalStayed,
+    },
+    series: manifest.map((webinar) => ({
+      serial: webinar.serial,
+      date: webinar.date,
+      weekday: webinar.weekday,
+      uniqueParticipants: webinar.summary?.uniqueParticipants || 0,
+      droppedBeforeCoursePercent: webinar.summary?.droppedBeforeCoursePercent || 0,
+      droppedDuringPitchWindowPercent: webinar.summary?.droppedDuringPitchWindowPercent || 0,
+      stayedTillEndPercent: webinar.summary?.stayedTillEndPercent || 0,
+    })),
   };
 }
 
@@ -204,6 +252,7 @@ async function main() {
   }
 
   await fs.writeFile(path.join(outputDir, "index.json"), `${JSON.stringify({ webinars: manifest }, null, 2)}\n`);
+  await fs.writeFile(path.join(outputDir, "aggregate.json"), `${JSON.stringify(buildAggregate(manifest), null, 2)}\n`);
 
   const latest = manifest[0];
   const latestPayload = await fs.readFile(path.join(outputDir, path.basename(latest.reportJson)), "utf8");

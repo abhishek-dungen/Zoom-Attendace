@@ -8,16 +8,36 @@ const effectiveDurationEl = document.getElementById("effectiveDuration");
 const droppedBeforeCourseMetricEl = document.getElementById("droppedBeforeCourseMetric");
 const droppedAfterCourseMetricEl = document.getElementById("droppedAfterCourseMetric");
 const stayedTillEndMetricEl = document.getElementById("stayedTillEndMetric");
-const effectiveWindowTextEl = document.getElementById("effectiveWindowText");
+const lengthSourceTextEl = document.getElementById("lengthSourceText");
 const courseRevealSourceEl = document.getElementById("courseRevealSource");
-const chatAvailabilityEl = document.getElementById("chatAvailability");
 const uniqueParticipantsTableEl = document.getElementById("uniqueParticipantsTable");
 const beforeCourseTableEl = document.getElementById("beforeCourseTable");
 const afterCourseTableEl = document.getElementById("afterCourseTable");
 const stayedTillEndTableEl = document.getElementById("stayedTillEndTable");
+const uniqueCsvLinkEl = document.getElementById("uniqueCsvLink");
+const beforeCourseCsvLinkEl = document.getElementById("beforeCourseCsvLink");
+const afterCourseCsvLinkEl = document.getElementById("afterCourseCsvLink");
+const stayedTillEndCsvLinkEl = document.getElementById("stayedTillEndCsvLink");
+const aggregateWebinarsEl = document.getElementById("aggregateWebinars");
+const aggregateAvgWebinarLengthEl = document.getElementById("aggregateAvgWebinarLength");
+const aggregateAvgParticipantsEl = document.getElementById("aggregateAvgParticipants");
+const aggregateAvgUniqueEl = document.getElementById("aggregateAvgUnique");
+const aggregateAvgEffectiveLengthEl = document.getElementById("aggregateAvgEffectiveLength");
+const aggregateAvgBeforeEl = document.getElementById("aggregateAvgBefore");
+const aggregateAvgAfterEl = document.getElementById("aggregateAvgAfter");
+const aggregateAvgStayedEl = document.getElementById("aggregateAvgStayed");
+const aggregatePctBeforeEl = document.getElementById("aggregatePctBefore");
+const aggregatePctAfterEl = document.getElementById("aggregatePctAfter");
+const aggregatePctStayedEl = document.getElementById("aggregatePctStayed");
+const chartUniqueParticipantsEl = document.getElementById("chartUniqueParticipants");
+const chartBeforePercentEl = document.getElementById("chartBeforePercent");
+const chartAfterPercentEl = document.getElementById("chartAfterPercent");
+const chartStayedPercentEl = document.getElementById("chartStayedPercent");
 const tileButtons = [...document.querySelectorAll(".tile-button")];
+const reportViews = [...document.querySelectorAll(".report-view")];
 
 let webinarManifest = [];
+let aggregatePayload = null;
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -28,7 +48,7 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
-function formatDateIst(value) {
+function formatDateTimeIst(value) {
   if (!value) {
     return "-";
   }
@@ -63,24 +83,50 @@ function formatDateOnlyIst(value) {
   }).format(date);
 }
 
-function formatDuration(seconds) {
-  const totalSeconds = Math.max(0, Number(seconds || 0));
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
+function formatTimeOnlyIst(value) {
+  if (!value) {
+    return "-";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("en-IN", {
+    timeZone: istTimeZone,
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  })
+    .format(date)
+    .toLowerCase();
+}
+
+function formatDurationSeconds(totalSeconds) {
+  const seconds = Math.max(0, Number(totalSeconds || 0));
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
 
   if (hours === 0) {
     return `${minutes}m`;
   }
-
   if (minutes === 0) {
     return `${hours}h`;
   }
-
   return `${hours}h ${minutes}m`;
+}
+
+function formatDurationMinutes(totalMinutes) {
+  return formatDurationSeconds(Number(totalMinutes || 0) * 60);
 }
 
 function formatPercent(value) {
   return `${Number(value || 0).toFixed(2)}%`;
+}
+
+function formatAverageNumber(value) {
+  return Number(value || 0).toFixed(2);
 }
 
 function renderMetricText(element, count, percent) {
@@ -118,11 +164,10 @@ function participantRows(participants) {
     escapeHtml(participant.name || "-"),
     escapeHtml(participant.email || "-"),
     escapeHtml(participant.phoneNumber || "-"),
-    escapeHtml(formatDateIst(participant.firstJoinTime)),
-    escapeHtml(formatDateIst(participant.finalDropTime)),
-    escapeHtml(participant.totalPresentFormatted || formatDuration(participant.totalPresentSeconds)),
+    escapeHtml(formatTimeOnlyIst(participant.firstJoinTime)),
+    escapeHtml(formatTimeOnlyIst(participant.finalDropTime)),
+    escapeHtml(participant.totalPresentFormatted || formatDurationSeconds(participant.totalPresentSeconds)),
     escapeHtml(formatPercent(participant.attendancePercent)),
-    escapeHtml(String(participant.joins || 0)),
   ]);
 }
 
@@ -131,64 +176,109 @@ function renderTables(payload) {
     "Name",
     "Email",
     "Phone Number",
-    "First Join (IST)",
-    "Final Drop (IST)",
+    "First Join",
+    "Final Drop",
     "Total Present",
     "Attendance %",
-    "Joins",
   ];
 
-  uniqueParticipantsTableEl.innerHTML = buildTable(
-    headers,
-    participantRows(payload.uniqueParticipants || []),
-    "No unique participants found."
-  );
-  beforeCourseTableEl.innerHTML = buildTable(
-    headers,
-    participantRows(payload.cohorts?.droppedBeforeCourse || []),
-    "Nobody dropped before the course reveal cutoff."
-  );
-  afterCourseTableEl.innerHTML = buildTable(
-    headers,
-    participantRows(payload.cohorts?.droppedDuringPitchWindow || []),
-    "Nobody dropped in the 30-minute window after course reveal."
-  );
-  stayedTillEndTableEl.innerHTML = buildTable(
-    headers,
-    participantRows(payload.cohorts?.stayedTillEnd || []),
-    "No participants matched the stayed-till-end rule."
-  );
+  uniqueParticipantsTableEl.innerHTML = buildTable(headers, participantRows(payload.uniqueParticipants || []), "No unique participants found.");
+  beforeCourseTableEl.innerHTML = buildTable(headers, participantRows(payload.cohorts?.droppedBeforeCourse || []), "Nobody dropped before the course reveal cutoff.");
+  afterCourseTableEl.innerHTML = buildTable(headers, participantRows(payload.cohorts?.droppedDuringPitchWindow || []), "Nobody dropped in the 30-minute window after course reveal.");
+  stayedTillEndTableEl.innerHTML = buildTable(headers, participantRows(payload.cohorts?.stayedTillEnd || []), "No participants matched the stayed-till-end rule.");
 }
 
 function renderSummary(payload) {
   uniqueParticipantsEl.textContent = String(payload.summary?.uniqueParticipants || 0);
   webinarDateEl.textContent = formatDateOnlyIst(payload.webinar?.startTime);
-  courseRevealTimeEl.textContent = formatDateIst(payload.courseReveal?.time);
+  courseRevealTimeEl.textContent = formatDateTimeIst(payload.courseReveal?.time);
   effectiveDurationEl.textContent = payload.effectiveWindow?.durationFormatted || "-";
 
-  renderMetricText(
-    droppedBeforeCourseMetricEl,
-    payload.summary?.droppedBeforeCourseCount || 0,
-    payload.summary?.droppedBeforeCoursePercent || 0
-  );
-  renderMetricText(
-    droppedAfterCourseMetricEl,
-    payload.summary?.droppedDuringPitchWindowCount || 0,
-    payload.summary?.droppedDuringPitchWindowPercent || 0
-  );
-  renderMetricText(
-    stayedTillEndMetricEl,
-    payload.summary?.stayedTillEndCount || 0,
-    payload.summary?.stayedTillEndPercent || 0
-  );
+  renderMetricText(droppedBeforeCourseMetricEl, payload.summary?.droppedBeforeCourseCount || 0, payload.summary?.droppedBeforeCoursePercent || 0);
+  renderMetricText(droppedAfterCourseMetricEl, payload.summary?.droppedDuringPitchWindowCount || 0, payload.summary?.droppedDuringPitchWindowPercent || 0);
+  renderMetricText(stayedTillEndMetricEl, payload.summary?.stayedTillEndCount || 0, payload.summary?.stayedTillEndPercent || 0);
 
-  effectiveWindowTextEl.textContent = `${formatDateIst(payload.effectiveWindow?.startTime)} to ${formatDateIst(payload.effectiveWindow?.endTime)}`;
+  lengthSourceTextEl.textContent =
+    payload.effectiveWindow?.startSource === "first_participant_chat_detected"
+      ? "Calculated from first participant chat"
+      : "Calculated from webinar start time";
   courseRevealSourceEl.textContent =
     payload.courseReveal?.source === "admin_chat_detected"
       ? "Detected from admin chat"
       : "Fallback 8:40 PM IST";
-  chatAvailabilityEl.textContent = `${payload.chatSummary?.totalChatMessages || 0} chat messages, ${payload.chatSummary?.attendeesWithChatComments || 0} attendees with saved chat`;
+
+  uniqueCsvLinkEl.href = webinarManifest.find((item) => item.reportJson === currentReportPath)?.uniqueCsv || "#";
+  beforeCourseCsvLinkEl.href = webinarManifest.find((item) => item.reportJson === currentReportPath)?.beforeCourseCsv || "#";
+  afterCourseCsvLinkEl.href = webinarManifest.find((item) => item.reportJson === currentReportPath)?.afterCourseCsv || "#";
+  stayedTillEndCsvLinkEl.href = webinarManifest.find((item) => item.reportJson === currentReportPath)?.stayedCsv || "#";
 }
+
+function createLineChart(series, valueKey, labelKey = "date", isPercent = false) {
+  if (!series.length) {
+    return `<p class="empty">No chart data available.</p>`;
+  }
+
+  const width = 620;
+  const height = 220;
+  const padding = 28;
+  const values = series.map((item) => Number(item[valueKey] || 0));
+  const maxValue = Math.max(...values, 1);
+  const minValue = Math.min(...values, 0);
+  const range = maxValue - minValue || 1;
+
+  const points = series.map((item, index) => {
+    const x = padding + (index * (width - padding * 2)) / Math.max(series.length - 1, 1);
+    const y = height - padding - ((Number(item[valueKey] || 0) - minValue) / range) * (height - padding * 2);
+    return { x, y, label: item[labelKey], value: item[valueKey] };
+  });
+
+  const polyline = points.map((point) => `${point.x},${point.y}`).join(" ");
+  const circles = points
+    .map(
+      (point) => `
+        <circle cx="${point.x}" cy="${point.y}" r="4" fill="#9a3412" />
+        <text x="${point.x}" y="${height - 8}" text-anchor="middle" font-size="10" fill="#6b625d">${escapeHtml(point.label)}</text>
+        <text x="${point.x}" y="${point.y - 10}" text-anchor="middle" font-size="10" fill="#1f1a17">${escapeHtml(
+          isPercent ? formatPercent(point.value) : String(point.value)
+        )}</text>
+      `
+    )
+    .join("");
+
+  return `
+    <svg viewBox="0 0 ${width} ${height}" class="chart-svg" role="img" aria-label="Line chart">
+      <line x1="${padding}" y1="${padding}" x2="${padding}" y2="${height - padding}" stroke="#d7cabd" />
+      <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="#d7cabd" />
+      <polyline fill="none" stroke="#9a3412" stroke-width="3" points="${polyline}" />
+      ${circles}
+    </svg>
+  `;
+}
+
+function renderAggregate() {
+  if (!aggregatePayload) {
+    return;
+  }
+
+  aggregateWebinarsEl.textContent = String(aggregatePayload.webinarsConsidered || 0);
+  aggregateAvgWebinarLengthEl.textContent = formatDurationMinutes(aggregatePayload.averages?.webinarLengthMinutes || 0);
+  aggregateAvgParticipantsEl.textContent = formatAverageNumber(aggregatePayload.averages?.sessionRecords || 0);
+  aggregateAvgUniqueEl.textContent = formatAverageNumber(aggregatePayload.averages?.uniqueParticipants || 0);
+  aggregateAvgEffectiveLengthEl.textContent = formatDurationSeconds(aggregatePayload.averages?.effectiveWebinarLengthSeconds || 0);
+  aggregateAvgBeforeEl.textContent = formatAverageNumber(aggregatePayload.averages?.droppedBeforeCourse || 0);
+  aggregateAvgAfterEl.textContent = formatAverageNumber(aggregatePayload.averages?.droppedDuringPitchWindow || 0);
+  aggregateAvgStayedEl.textContent = formatAverageNumber(aggregatePayload.averages?.stayedTillEnd || 0);
+  aggregatePctBeforeEl.textContent = formatPercent(aggregatePayload.aggregatePercentages?.droppedBeforeCourse || 0);
+  aggregatePctAfterEl.textContent = formatPercent(aggregatePayload.aggregatePercentages?.droppedDuringPitchWindow || 0);
+  aggregatePctStayedEl.textContent = formatPercent(aggregatePayload.aggregatePercentages?.stayedTillEnd || 0);
+
+  chartUniqueParticipantsEl.innerHTML = createLineChart(aggregatePayload.series || [], "uniqueParticipants", "serial", false);
+  chartBeforePercentEl.innerHTML = createLineChart(aggregatePayload.series || [], "droppedBeforeCoursePercent", "serial", true);
+  chartAfterPercentEl.innerHTML = createLineChart(aggregatePayload.series || [], "droppedDuringPitchWindowPercent", "serial", true);
+  chartStayedPercentEl.innerHTML = createLineChart(aggregatePayload.series || [], "stayedTillEndPercent", "serial", true);
+}
+
+let currentReportPath = "";
 
 function render(payload) {
   renderSummary(payload);
@@ -203,7 +293,6 @@ async function loadManifest() {
 
   const payload = await response.json();
   webinarManifest = payload.webinars || [];
-
   webinarSelectEl.innerHTML = webinarManifest
     .map(
       (webinar) => `
@@ -215,42 +304,58 @@ async function loadManifest() {
     .join("");
 }
 
-async function loadReport(reportJsonPath) {
-  try {
-    const response = await fetch(`${reportJsonPath}?ts=${Date.now()}`);
-    if (!response.ok) {
-      throw new Error("No published webinar report found yet.");
-    }
+async function loadAggregate() {
+  const response = await fetch(`data/aggregate.json?ts=${Date.now()}`);
+  if (!response.ok) {
+    throw new Error("No aggregate report found.");
+  }
 
-    const payload = await response.json();
-    render(payload);
-  } catch (error) {
-    uniqueParticipantsTableEl.innerHTML = `<p class="empty">${escapeHtml(error.message || "Failed to load webinar report.")}</p>`;
+  aggregatePayload = await response.json();
+  renderAggregate();
+}
+
+async function loadReport(reportJsonPath) {
+  const response = await fetch(`${reportJsonPath}?ts=${Date.now()}`);
+  if (!response.ok) {
+    throw new Error("No published webinar report found yet.");
+  }
+
+  currentReportPath = reportJsonPath;
+  const payload = await response.json();
+  render(payload);
+}
+
+function setActiveView(viewId) {
+  for (const button of tileButtons) {
+    button.classList.toggle("is-active", button.dataset.view === viewId);
+  }
+  for (const view of reportViews) {
+    view.classList.toggle("is-active", view.id === viewId);
   }
 }
 
 function attachInteractions() {
-  webinarSelectEl.addEventListener("change", (event) => {
-    loadReport(event.target.value);
+  webinarSelectEl.addEventListener("change", async (event) => {
+    await loadReport(event.target.value);
   });
 
   for (const button of tileButtons) {
     button.addEventListener("click", () => {
-      const target = document.getElementById(button.dataset.target);
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+      setActiveView(button.dataset.view);
     });
   }
 }
 
 async function init() {
-  await loadManifest();
+  await Promise.all([loadManifest(), loadAggregate()]);
   attachInteractions();
   if (webinarManifest[0]) {
     webinarSelectEl.value = webinarManifest[0].reportJson;
     await loadReport(webinarManifest[0].reportJson);
   }
+  setActiveView("uniqueParticipantsView");
 }
 
-init();
+init().catch((error) => {
+  uniqueParticipantsTableEl.innerHTML = `<p class="empty">${escapeHtml(error.message || "Failed to load dashboard.")}</p>`;
+});

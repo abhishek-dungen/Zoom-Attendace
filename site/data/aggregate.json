@@ -1,0 +1,61 @@
+{
+  "webinarsConsidered": 4,
+  "averages": {
+    "webinarLengthMinutes": 277.25,
+    "sessionRecords": 175.5,
+    "uniqueParticipants": 77.5,
+    "effectiveWebinarLengthSeconds": 16611.75,
+    "droppedBeforeCourse": 26.5,
+    "droppedDuringPitchWindow": 12.25,
+    "stayedTillEnd": 14.75
+  },
+  "aggregatePercentages": {
+    "droppedBeforeCourse": 34.19,
+    "droppedDuringPitchWindow": 15.81,
+    "stayedTillEnd": 19.03
+  },
+  "totals": {
+    "uniqueParticipants": 310,
+    "droppedBeforeCourse": 106,
+    "droppedDuringPitchWindow": 49,
+    "stayedTillEnd": 59
+  },
+  "series": [
+    {
+      "serial": 1,
+      "date": "24 May 2026",
+      "weekday": "Sunday",
+      "uniqueParticipants": 71,
+      "droppedBeforeCoursePercent": 40.85,
+      "droppedDuringPitchWindowPercent": 18.31,
+      "stayedTillEndPercent": 26.76
+    },
+    {
+      "serial": 2,
+      "date": "17 May 2026",
+      "weekday": "Sunday",
+      "uniqueParticipants": 75,
+      "droppedBeforeCoursePercent": 25.33,
+      "droppedDuringPitchWindowPercent": 20,
+      "stayedTillEndPercent": 21.33
+    },
+    {
+      "serial": 3,
+      "date": "10 May 2026",
+      "weekday": "Sunday",
+      "uniqueParticipants": 93,
+      "droppedBeforeCoursePercent": 36.56,
+      "droppedDuringPitchWindowPercent": 13.98,
+      "stayedTillEndPercent": 15.05
+    },
+    {
+      "serial": 4,
+      "date": "3 May 2026",
+      "weekday": "Sunday",
+      "uniqueParticipants": 71,
+      "droppedBeforeCoursePercent": 33.8,
+      "droppedDuringPitchWindowPercent": 11.27,
+      "stayedTillEndPercent": 14.08
+    }
+  ]
+}

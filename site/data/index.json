@@ -14,7 +14,19 @@
       "uniqueCsv": "data/2026-05-24-89557058450.csv",
       "beforeCourseCsv": "data/2026-05-24-89557058450-before-course.csv",
       "afterCourseCsv": "data/2026-05-24-89557058450-after-course-30m.csv",
-      "stayedCsv": "data/2026-05-24-89557058450-stayed-till-end.csv"
+      "stayedCsv": "data/2026-05-24-89557058450-stayed-till-end.csv",
+      "summary": {
+        "uniqueParticipants": 71,
+        "sessionRecords": 136,
+        "droppedBeforeCourseCount": 29,
+        "droppedBeforeCoursePercent": 40.85,
+        "droppedDuringPitchWindowCount": 13,
+        "droppedDuringPitchWindowPercent": 18.31,
+        "stayedTillEndCount": 19,
+        "stayedTillEndPercent": 26.76
+      },
+      "effectiveDurationSeconds": 15223,
+      "webinarDurationMinutes": 254
     },
     {
       "serial": 2,
@@ -30,7 +42,19 @@
       "uniqueCsv": "data/2026-05-17-88583977339.csv",
       "beforeCourseCsv": "data/2026-05-17-88583977339-before-course.csv",
       "afterCourseCsv": "data/2026-05-17-88583977339-after-course-30m.csv",
-      "stayedCsv": "data/2026-05-17-88583977339-stayed-till-end.csv"
+      "stayedCsv": "data/2026-05-17-88583977339-stayed-till-end.csv",
+      "summary": {
+        "uniqueParticipants": 75,
+        "sessionRecords": 195,
+        "droppedBeforeCourseCount": 19,
+        "droppedBeforeCoursePercent": 25.33,
+        "droppedDuringPitchWindowCount": 15,
+        "droppedDuringPitchWindowPercent": 20,
+        "stayedTillEndCount": 16,
+        "stayedTillEndPercent": 21.33
+      },
+      "effectiveDurationSeconds": 17427,
+      "webinarDurationMinutes": 291
     },
     {
       "serial": 3,
@@ -46,7 +70,19 @@
       "uniqueCsv": "data/2026-05-10-89051688719.csv",
       "beforeCourseCsv": "data/2026-05-10-89051688719-before-course.csv",
       "afterCourseCsv": "data/2026-05-10-89051688719-after-course-30m.csv",
-      "stayedCsv": "data/2026-05-10-89051688719-stayed-till-end.csv"
+      "stayedCsv": "data/2026-05-10-89051688719-stayed-till-end.csv",
+      "summary": {
+        "uniqueParticipants": 93,
+        "sessionRecords": 205,
+        "droppedBeforeCourseCount": 34,
+        "droppedBeforeCoursePercent": 36.56,
+        "droppedDuringPitchWindowCount": 13,
+        "droppedDuringPitchWindowPercent": 13.98,
+        "stayedTillEndCount": 14,
+        "stayedTillEndPercent": 15.05
+      },
+      "effectiveDurationSeconds": 17494,
+      "webinarDurationMinutes": 292
     },
     {
       "serial": 4,
@@ -62,7 +98,19 @@
       "uniqueCsv": "data/2026-05-03-89241608257.csv",
       "beforeCourseCsv": "data/2026-05-03-89241608257-before-course.csv",
       "afterCourseCsv": "data/2026-05-03-89241608257-after-course-30m.csv",
-      "stayedCsv": "data/2026-05-03-89241608257-stayed-till-end.csv"
+      "stayedCsv": "data/2026-05-03-89241608257-stayed-till-end.csv",
+      "summary": {
+        "uniqueParticipants": 71,
+        "sessionRecords": 166,
+        "droppedBeforeCourseCount": 24,
+        "droppedBeforeCoursePercent": 33.8,
+        "droppedDuringPitchWindowCount": 8,
+        "droppedDuringPitchWindowPercent": 11.27,
+        "stayedTillEndCount": 10,
+        "stayedTillEndPercent": 14.08
+      },
+      "effectiveDurationSeconds": 16303,
+      "webinarDurationMinutes": 272
     }
   ]
 }

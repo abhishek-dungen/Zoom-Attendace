@@ -4,15 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Zoom Webinar Analysis</title>
-    <link rel="stylesheet" href="styles.css?v=20260529-5" />
+    <link rel="stylesheet" href="styles.css?v=20260529-6" />
   </head>
   <body>
     <main class="page">
-      <section class="hero">
-        <p class="eyebrow">Zoom Webinar Analysis</p>
-        <h1>Webinar retention analysis</h1>
-      </section>
-
       <section class="panel selector-panel">
         <label class="selector-label" for="webinarSelect">Choose webinar</label>
         <select id="webinarSelect" class="selector-input">
@@ -59,62 +54,129 @@
         </div>
         <div class="meta-grid">
           <article class="meta-card">
-            <span>Effective attendance window</span>
-            <strong id="effectiveWindowText">-</strong>
+            <span>Length Source</span>
+            <strong id="lengthSourceText">-</strong>
           </article>
           <article class="meta-card">
             <span>Course reveal source</span>
             <strong id="courseRevealSource">-</strong>
-          </article>
-          <article class="meta-card">
-            <span>Chat availability</span>
-            <strong id="chatAvailability">-</strong>
           </article>
         </div>
       </section>
 
       <section class="panel tiles-panel">
         <div class="report-tiles">
-          <button class="tile-button" data-target="uniqueParticipantsSection" type="button">Unique participants list</button>
-          <button class="tile-button" data-target="beforeCourseSection" type="button">Dropped before course</button>
-          <button class="tile-button" data-target="afterCourseSection" type="button">Dropped in next 30 min</button>
-          <button class="tile-button" data-target="stayedTillEndSection" type="button">Stayed till end</button>
+          <button class="tile-button is-active" data-view="uniqueParticipantsView" type="button">Unique participants list</button>
+          <button class="tile-button" data-view="beforeCourseView" type="button">Dropped before course</button>
+          <button class="tile-button" data-view="afterCourseView" type="button">Dropped in next 30 min</button>
+          <button class="tile-button" data-view="stayedTillEndView" type="button">Stayed till end</button>
+          <button class="tile-button" data-view="consolidatedView" type="button">Consolidated report</button>
         </div>
       </section>
 
-      <section class="panel table-panel" id="uniqueParticipantsSection">
-        <div class="section-head">
+      <section class="panel table-panel report-view is-active" id="uniqueParticipantsView">
+        <div class="section-head section-head-row">
           <h2>Unique Participant List</h2>
-          <p>Earliest join, final drop, effective presence duration, and attendance percentage.</p>
+          <a id="uniqueCsvLink" class="button small" href="#">Download CSV</a>
         </div>
         <div class="table-wrap" id="uniqueParticipantsTable"></div>
       </section>
 
-      <section class="panel table-panel" id="beforeCourseSection">
-        <div class="section-head">
+      <section class="panel table-panel report-view" id="beforeCourseView">
+        <div class="section-head section-head-row">
           <h2>Dropped Before Course Reveal</h2>
-          <p>Participants whose final drop time was before the detected or fallback course-reveal time.</p>
+          <a id="beforeCourseCsvLink" class="button small" href="#">Download CSV</a>
         </div>
         <div class="table-wrap" id="beforeCourseTable"></div>
       </section>
 
-      <section class="panel table-panel" id="afterCourseSection">
-        <div class="section-head">
+      <section class="panel table-panel report-view" id="afterCourseView">
+        <div class="section-head section-head-row">
           <h2>Dropped In The Next 30 Minutes</h2>
-          <p>Participants whose final drop happened in the 30-minute pitch window after course reveal.</p>
+          <a id="afterCourseCsvLink" class="button small" href="#">Download CSV</a>
         </div>
         <div class="table-wrap" id="afterCourseTable"></div>
       </section>
 
-      <section class="panel table-panel" id="stayedTillEndSection">
-        <div class="section-head">
+      <section class="panel table-panel report-view" id="stayedTillEndView">
+        <div class="section-head section-head-row">
           <h2>Stayed Till End</h2>
-          <p>Participants whose final drop was within the configured stay-till-end tolerance window.</p>
+          <a id="stayedTillEndCsvLink" class="button small" href="#">Download CSV</a>
         </div>
         <div class="table-wrap" id="stayedTillEndTable"></div>
       </section>
+
+      <section class="panel table-panel report-view" id="consolidatedView">
+        <div class="section-head">
+          <h2>Consolidated Report</h2>
+        </div>
+        <div class="consolidated-grid">
+          <article class="meta-card">
+            <span>Webinars considered</span>
+            <strong id="aggregateWebinars">0</strong>
+          </article>
+          <article class="meta-card">
+            <span>Average webinar length</span>
+            <strong id="aggregateAvgWebinarLength">-</strong>
+          </article>
+          <article class="meta-card">
+            <span>Average participants</span>
+            <strong id="aggregateAvgParticipants">-</strong>
+          </article>
+          <article class="meta-card">
+            <span>Average unique participants</span>
+            <strong id="aggregateAvgUnique">-</strong>
+          </article>
+          <article class="meta-card">
+            <span>Average effective length</span>
+            <strong id="aggregateAvgEffectiveLength">-</strong>
+          </article>
+          <article class="meta-card">
+            <span>Average dropped before course</span>
+            <strong id="aggregateAvgBefore">-</strong>
+          </article>
+          <article class="meta-card">
+            <span>Average dropped in next 30 min</span>
+            <strong id="aggregateAvgAfter">-</strong>
+          </article>
+          <article class="meta-card">
+            <span>Average stayed till end</span>
+            <strong id="aggregateAvgStayed">-</strong>
+          </article>
+          <article class="meta-card">
+            <span>Historical drop before course %</span>
+            <strong id="aggregatePctBefore">-</strong>
+          </article>
+          <article class="meta-card">
+            <span>Historical drop in next 30 min %</span>
+            <strong id="aggregatePctAfter">-</strong>
+          </article>
+          <article class="meta-card">
+            <span>Historical stayed till end %</span>
+            <strong id="aggregatePctStayed">-</strong>
+          </article>
+        </div>
+        <div class="chart-grid">
+          <article class="chart-card">
+            <h3>Unique participants by webinar</h3>
+            <div id="chartUniqueParticipants"></div>
+          </article>
+          <article class="chart-card">
+            <h3>Drop before course %</h3>
+            <div id="chartBeforePercent"></div>
+          </article>
+          <article class="chart-card">
+            <h3>Drop in next 30 min %</h3>
+            <div id="chartAfterPercent"></div>
+          </article>
+          <article class="chart-card">
+            <h3>Stayed till end %</h3>
+            <div id="chartStayedPercent"></div>
+          </article>
+        </div>
+      </section>
     </main>
 
-    <script type="module" src="app.js?v=20260529-5"></script>
+    <script type="module" src="app.js?v=20260529-7"></script>
   </body>
 </html>

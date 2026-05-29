@@ -10,6 +10,14 @@
   --accent-soft: rgba(139, 58, 22, 0.08);
   --line: rgba(62, 43, 25, 0.08);
   --shadow: 0 12px 36px rgba(62, 43, 25, 0.06);
+  --list-shell: #22292d;
+  --list-head: #2a3236;
+  --list-row: #2d3539;
+  --list-row-alt: #31393d;
+  --list-row-hover: #394246;
+  --list-text: #f3f2ef;
+  --list-muted: #b7b9b6;
+  --list-line: rgba(255, 255, 255, 0.06);
 }
 
 * {
@@ -200,6 +208,10 @@ body {
 
 .table-wrap {
   overflow-x: auto;
+  border-radius: 18px;
+  background: var(--list-shell);
+  border: 1px solid rgba(17, 24, 28, 0.28);
+  padding: 8px;
 }
 
 .report-view {
@@ -210,33 +222,82 @@ body {
   display: block;
 }
 
-table {
+.list-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   min-width: 940px;
+  color: var(--list-text);
 }
 
-th,
-td {
+.list-table th,
+.list-table td {
   text-align: left;
-  padding: 13px 10px;
-  border-bottom: 1px solid var(--line);
+  padding: 13px 14px;
   vertical-align: top;
 }
 
-th {
-  font-size: 0.74rem;
+.list-table thead th {
+  background: var(--list-head);
+  color: var(--list-muted);
+  font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--list-line);
 }
 
-.table-wrap table tr:last-child td {
+.list-table thead th:first-child {
+  border-top-left-radius: 12px;
+}
+
+.list-table thead th:last-child {
+  border-top-right-radius: 12px;
+}
+
+.list-table tbody tr:nth-child(odd) td {
+  background: var(--list-row);
+}
+
+.list-table tbody tr:nth-child(even) td {
+  background: var(--list-row-alt);
+}
+
+.list-table tbody tr:hover td {
+  background: var(--list-row-hover);
+}
+
+.list-table tbody td {
+  border-bottom: 1px solid var(--list-line);
+}
+
+.list-table tbody tr:last-child td {
   border-bottom: 0;
 }
 
+.list-table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 12px;
+}
+
+.list-table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 12px;
+}
+
+.list-table tbody td:first-child {
+  font-weight: 600;
+}
+
+.list-table tbody td:nth-child(2),
+.list-table tbody td:nth-child(3),
+.list-table tbody td:nth-child(4),
+.list-table tbody td:nth-child(5),
+.list-table tbody td:nth-child(6),
+.list-table tbody td:nth-child(7) {
+  color: #e4e3df;
+}
+
 .empty {
-  color: var(--muted);
+  color: var(--list-muted);
   text-align: center;
   padding: 28px;
 }
@@ -299,5 +360,10 @@ th {
   .consolidated-grid,
   .chart-grid {
     grid-template-columns: 1fr;
+  }
+
+  .table-wrap {
+    padding: 6px;
+    border-radius: 14px;
   }
 }

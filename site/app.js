@@ -149,7 +149,7 @@ function buildTable(headers, rows, emptyMessage) {
     .join("");
 
   return `
-    <table>
+    <table class="list-table">
       <thead>
         <tr>${tableHeaders}</tr>
       </thead>

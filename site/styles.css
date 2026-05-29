@@ -63,43 +63,54 @@ body {
 }
 
 .overview-panel,
+.tiles-panel,
 .table-panel {
   margin-top: 16px;
 }
 
-.overview-table {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0;
-  background: rgba(255, 255, 255, 0.68);
+.metric-table {
+  width: min(640px, 100%);
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.72);
   border: 1px solid var(--card-border);
-  border-radius: 18px;
+  border-radius: 16px;
   overflow: hidden;
+  box-shadow: var(--shadow);
 }
 
-.overview-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  align-items: center;
-  gap: 14px;
-  padding: 13px 16px;
+.metric-table tbody,
+.metric-table tr {
+  width: 100%;
+}
+
+.metric-table th,
+.metric-table td {
+  padding: 11px 14px;
   border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+  line-height: 1.25;
 }
 
-.overview-row:last-child {
+.metric-table tr:last-child th,
+.metric-table tr:last-child td {
   border-bottom: 0;
 }
 
-.overview-row span {
+.metric-table th {
+  width: 1%;
+  white-space: nowrap;
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.86rem;
+  font-weight: 500;
+  text-align: left;
 }
 
-.overview-row strong {
-  font-size: 1rem;
-  line-height: 1.35;
-  font-weight: 600;
+.metric-table td {
+  width: 1%;
+  white-space: nowrap;
   text-align: right;
+  font-size: 0.98rem;
+  font-weight: 600;
 }
 
 .section-head {
@@ -285,12 +296,15 @@ body {
     padding: 14px;
   }
 
-  .overview-row {
-    grid-template-columns: 1fr;
-    gap: 4px;
+  .metric-table th,
+  .metric-table td {
+    display: block;
+    width: auto;
+    white-space: normal;
+    padding: 9px 12px;
   }
 
-  .overview-row strong {
+  .metric-table td {
     text-align: left;
   }
 

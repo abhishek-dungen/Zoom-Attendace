@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Zoom Webinar Analysis</title>
-    <link rel="stylesheet" href="styles.css?v=20260529-11" />
+    <link rel="stylesheet" href="styles.css?v=20260529-12" />
   </head>
   <body>
     <main class="page">
@@ -16,44 +16,19 @@
       </section>
 
       <section class="panel overview-panel">
-        <div class="overview-table" id="summary">
-          <article class="overview-row">
-            <span>Unique Participants</span>
-            <strong id="uniqueParticipants">0</strong>
-          </article>
-          <article class="overview-row">
-            <span>Webinar Date</span>
-            <strong id="webinarDate">-</strong>
-          </article>
-          <article class="overview-row">
-            <span>Effective Webinar Length</span>
-            <strong id="effectiveDuration">-</strong>
-          </article>
-          <article class="overview-row">
-            <span>Course Reveal Time</span>
-            <strong id="courseRevealTime">-</strong>
-          </article>
-          <article class="overview-row">
-            <span>Dropped before course</span>
-            <strong id="droppedBeforeCourseMetric">0</strong>
-          </article>
-          <article class="overview-row">
-            <span>Dropped in next 30 min</span>
-            <strong id="droppedAfterCourseMetric">0</strong>
-          </article>
-          <article class="overview-row">
-            <span>Stayed till end</span>
-            <strong id="stayedTillEndMetric">0</strong>
-          </article>
-          <article class="overview-row">
-            <span>Length Source</span>
-            <strong id="lengthSourceText">-</strong>
-          </article>
-          <article class="overview-row">
-            <span>Course reveal source</span>
-            <strong id="courseRevealSource">-</strong>
-          </article>
-        </div>
+        <table class="metric-table" id="summary">
+          <tbody>
+            <tr><th>Unique Participants</th><td id="uniqueParticipants">0</td></tr>
+            <tr><th>Webinar Date</th><td id="webinarDate">-</td></tr>
+            <tr><th>Effective Webinar Length</th><td id="effectiveDuration">-</td></tr>
+            <tr><th>Course Reveal Time</th><td id="courseRevealTime">-</td></tr>
+            <tr><th>Dropped before course</th><td id="droppedBeforeCourseMetric">0</td></tr>
+            <tr><th>Dropped in next 30 min</th><td id="droppedAfterCourseMetric">0</td></tr>
+            <tr><th>Stayed till end</th><td id="stayedTillEndMetric">0</td></tr>
+            <tr><th>Length Source</th><td id="lengthSourceText">-</td></tr>
+            <tr><th>Course reveal source</th><td id="courseRevealSource">-</td></tr>
+          </tbody>
+        </table>
       </section>
 
       <section class="panel tiles-panel">
@@ -99,48 +74,20 @@
       </section>
 
       <section class="panel table-panel report-view" id="consolidatedView">
-        <div class="overview-table consolidated-table">
-          <article class="overview-row">
-            <span>Webinars considered</span>
-            <strong id="aggregateWebinars">0</strong>
-          </article>
-          <article class="overview-row">
-            <span>Average webinar length</span>
-            <strong id="aggregateAvgWebinarLength">-</strong>
-          </article>
-          <article class="overview-row">
-            <span>Average unique participants</span>
-            <strong id="aggregateAvgUnique">-</strong>
-          </article>
-          <article class="overview-row">
-            <span>Average effective length</span>
-            <strong id="aggregateAvgEffectiveLength">-</strong>
-          </article>
-          <article class="overview-row">
-            <span>Average dropped before course</span>
-            <strong id="aggregateAvgBefore">-</strong>
-          </article>
-          <article class="overview-row">
-            <span>Average dropped in next 30 min</span>
-            <strong id="aggregateAvgAfter">-</strong>
-          </article>
-          <article class="overview-row">
-            <span>Average stayed till end</span>
-            <strong id="aggregateAvgStayed">-</strong>
-          </article>
-          <article class="overview-row">
-            <span>Historical drop before course %</span>
-            <strong id="aggregatePctBefore">-</strong>
-          </article>
-          <article class="overview-row">
-            <span>Historical drop in next 30 min %</span>
-            <strong id="aggregatePctAfter">-</strong>
-          </article>
-          <article class="overview-row">
-            <span>Historical stayed till end %</span>
-            <strong id="aggregatePctStayed">-</strong>
-          </article>
-        </div>
+        <table class="metric-table consolidated-table">
+          <tbody>
+            <tr><th>Webinars considered</th><td id="aggregateWebinars">0</td></tr>
+            <tr><th>Average webinar length</th><td id="aggregateAvgWebinarLength">-</td></tr>
+            <tr><th>Average unique participants</th><td id="aggregateAvgUnique">-</td></tr>
+            <tr><th>Average effective length</th><td id="aggregateAvgEffectiveLength">-</td></tr>
+            <tr><th>Average dropped before course</th><td id="aggregateAvgBefore">-</td></tr>
+            <tr><th>Average dropped in next 30 min</th><td id="aggregateAvgAfter">-</td></tr>
+            <tr><th>Average stayed till end</th><td id="aggregateAvgStayed">-</td></tr>
+            <tr><th>Historical drop before course %</th><td id="aggregatePctBefore">-</td></tr>
+            <tr><th>Historical drop in next 30 min %</th><td id="aggregatePctAfter">-</td></tr>
+            <tr><th>Historical stayed till end %</th><td id="aggregatePctStayed">-</td></tr>
+          </tbody>
+        </table>
         <div class="chart-grid">
           <article class="chart-card">
             <h3>Unique participants by webinar</h3>
@@ -162,6 +109,6 @@
       </section>
     </main>
 
-    <script type="module" src="app.js?v=20260529-11"></script>
+    <script type="module" src="app.js?v=20260529-12"></script>
   </body>
 </html>

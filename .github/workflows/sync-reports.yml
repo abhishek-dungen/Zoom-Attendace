@@ -1,18 +1,15 @@
-name: Fetch Zoom Attendance
+name: Sync Zoom Reports
 
 on:
+  schedule:
+    - cron: "30 18 * * *"
   workflow_dispatch:
-    inputs:
-      webinar_id:
-        description: Zoom webinar ID to fetch
-        required: true
-        type: string
 
 permissions:
   contents: write
 
 jobs:
-  fetch:
+  sync:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,13 +25,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Fetch webinar attendance
+      - name: Sync webinar reports from Zoom
         env:
           ZOOM_ACCOUNT_ID: ${{ secrets.ZOOM_ACCOUNT_ID }}
           ZOOM_CLIENT_ID: ${{ secrets.ZOOM_CLIENT_ID }}
           ZOOM_CLIENT_SECRET: ${{ secrets.ZOOM_CLIENT_SECRET }}
-          WEBINAR_ID: ${{ inputs.webinar_id }}
-        run: npm run fetch:attendance
+          ADMIN_NAME: Abhishek Kumar
+          ADMIN_EMAIL: excelbhaiya.systeme.oi@gmail.com
+        run: npm run sync:reports
 
       - name: Back up reports to Firebase
         if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY != '' && secrets.FIREBASE_STORAGE_BUCKET != '' }}
@@ -44,11 +42,11 @@ jobs:
           FIREBASE_STORAGE_PREFIX: zoom-attendance
         run: npm run backup:firebase
 
-      - name: Commit generated attendance files
+      - name: Commit generated report files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add site/data
+          git add site
           git diff --cached --quiet && exit 0
-          git commit -m "Update Zoom attendance for webinar ${{ inputs.webinar_id }}"
+          git commit -m "Sync Zoom webinar reports"
           git push

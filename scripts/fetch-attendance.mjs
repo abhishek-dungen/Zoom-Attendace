@@ -10,6 +10,7 @@ const outputBasename = process.env.OUTPUT_BASENAME || "latest";
 const outputDir = path.resolve("site", "data");
 const istTimeZone = "Asia/Kolkata";
 const pitchWindowMinutes = 30;
+const dropoutBucketMinutes = 15;
 const fallbackCourseRevealHourIst = 20;
 const fallbackCourseRevealMinuteIst = 40;
 const stayedTillEndToleranceSeconds = 5 * 60;
@@ -141,6 +142,22 @@ function formatDateIst(isoString) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
+}
+
+function formatTimeIst(isoString) {
+  const date = parseIsoDate(isoString);
+  if (!date) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat("en-IN", {
+    timeZone: istTimeZone,
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  })
+    .format(date)
+    .toLowerCase();
 }
 
 function formatDurationHoursMinutes(totalSeconds) {
@@ -589,6 +606,74 @@ function markParticipantCohorts(uniqueParticipants, chatCommentsIndex, courseRev
   };
 }
 
+function buildDropoutBucketLabel(startTime, startOffsetSeconds, endOffsetSeconds) {
+  const start = addSeconds(startTime, startOffsetSeconds);
+  const end = addSeconds(startTime, endOffsetSeconds);
+
+  return {
+    startTime: start,
+    endTime: end,
+    timeRangeLabel: `${formatTimeIst(start)} to ${formatTimeIst(end)}`,
+    offsetRangeLabel: `${Math.floor(startOffsetSeconds / 60)}-${Math.floor(endOffsetSeconds / 60)} min`,
+  };
+}
+
+function buildFifteenMinuteAnalysis(uniqueParticipants, webinarWindow) {
+  const effectiveStartDate = parseIsoDate(webinarWindow.effectiveStartTime);
+  const effectiveEndDate = parseIsoDate(webinarWindow.effectiveEndTime);
+  if (!effectiveStartDate || !effectiveEndDate || effectiveEndDate <= effectiveStartDate) {
+    return {
+      bucketMinutes: dropoutBucketMinutes,
+      bucketCount: 0,
+      buckets: [],
+    };
+  }
+
+  const totalDurationSeconds = Math.floor((effectiveEndDate.getTime() - effectiveStartDate.getTime()) / 1000);
+  const bucketSizeSeconds = dropoutBucketMinutes * 60;
+  const bucketCount = Math.ceil(totalDurationSeconds / bucketSizeSeconds);
+  const buckets = Array.from({ length: bucketCount }, (_, index) => {
+    const startOffsetSeconds = index * bucketSizeSeconds;
+    const endOffsetSeconds = Math.min((index + 1) * bucketSizeSeconds, totalDurationSeconds);
+    const labels = buildDropoutBucketLabel(webinarWindow.effectiveStartTime, startOffsetSeconds, endOffsetSeconds);
+
+    return {
+      slotNumber: index + 1,
+      startOffsetMinutes: Math.floor(startOffsetSeconds / 60),
+      endOffsetMinutes: Math.floor(endOffsetSeconds / 60),
+      startTime: labels.startTime,
+      endTime: labels.endTime,
+      timeRangeLabel: labels.timeRangeLabel,
+      offsetRangeLabel: labels.offsetRangeLabel,
+      permanentDropouts: 0,
+      participantKeys: [],
+    };
+  });
+
+  for (const participant of uniqueParticipants) {
+    if (participant.stayedTillEnd) {
+      continue;
+    }
+
+    const finalDropDate = parseIsoDate(participant.finalDropTime);
+    if (!finalDropDate || finalDropDate <= effectiveStartDate || finalDropDate >= effectiveEndDate) {
+      continue;
+    }
+
+    const offsetSeconds = Math.floor((finalDropDate.getTime() - effectiveStartDate.getTime()) / 1000);
+    const bucketIndex = Math.min(Math.floor(offsetSeconds / bucketSizeSeconds), bucketCount - 1);
+    const bucket = buckets[bucketIndex];
+    bucket.permanentDropouts += 1;
+    bucket.participantKeys.push(participant.email || participant.phoneNumber || participant.name);
+  }
+
+  return {
+    bucketMinutes: dropoutBucketMinutes,
+    bucketCount,
+    buckets,
+  };
+}
+
 function buildCohorts(uniqueParticipants) {
   return {
     droppedBeforeCourse: uniqueParticipants.filter((participant) => participant.droppedBeforeCourse),
@@ -715,6 +800,7 @@ async function main() {
   }));
   const cohorts = buildCohorts(uniqueParticipants);
   const summary = buildSummary(uniqueParticipants, participants.length, cohorts);
+  const fifteenMinuteAnalysis = buildFifteenMinuteAnalysis(uniqueParticipants, webinarWindow);
 
   const payload = {
     generatedAt: new Date().toISOString(),
@@ -761,6 +847,7 @@ async function main() {
       totalChatMessages: chatMessages.length,
       attendeesWithChatComments: uniqueParticipants.filter((participant) => participant.chatCommentsCount > 0).length,
     },
+    fifteenMinuteAnalysis,
     uniqueParticipants,
     cohorts,
     rawSessionParticipants: participants,

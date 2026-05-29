@@ -32,11 +32,16 @@ const chartUniqueParticipantsEl = document.getElementById("chartUniqueParticipan
 const chartBeforePercentEl = document.getElementById("chartBeforePercent");
 const chartAfterPercentEl = document.getElementById("chartAfterPercent");
 const chartStayedPercentEl = document.getElementById("chartStayedPercent");
+const chartFifteenMinuteSelectedEl = document.getElementById("chartFifteenMinuteSelected");
+const chartFifteenMinuteHistoricalEl = document.getElementById("chartFifteenMinuteHistorical");
+const fifteenMinuteSelectedNoteEl = document.getElementById("fifteenMinuteSelectedNote");
+const fifteenMinuteHistoricalNoteEl = document.getElementById("fifteenMinuteHistoricalNote");
 const tileButtons = [...document.querySelectorAll(".tile-button")];
 const reportViews = [...document.querySelectorAll(".report-view")];
 
 let webinarManifest = [];
 let aggregatePayload = null;
+let currentPayload = null;
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -254,6 +259,97 @@ function createLineChart(series, valueKey, labelKey = "date", isPercent = false)
   `;
 }
 
+function createBarChart(series, valueKey, labelKey, isPercent = false) {
+  if (!series.length) {
+    return `<p class="empty">No chart data available.</p>`;
+  }
+
+  const width = Math.max(760, series.length * 82);
+  const height = 280;
+  const paddingLeft = 36;
+  const paddingRight = 16;
+  const chartTop = 24;
+  const chartBottom = 76;
+  const chartHeight = height - chartTop - chartBottom;
+  const chartWidth = width - paddingLeft - paddingRight;
+  const values = series.map((item) => Number(item[valueKey] || 0));
+  const maxValue = Math.max(...values, 1);
+  const gap = 16;
+  const barWidth = Math.max(24, (chartWidth - gap * (series.length - 1)) / series.length);
+  const step = barWidth + gap;
+
+  const bars = series
+    .map((item, index) => {
+      const value = Number(item[valueKey] || 0);
+      const barHeight = maxValue ? (value / maxValue) * chartHeight : 0;
+      const x = paddingLeft + index * step;
+      const y = chartTop + (chartHeight - barHeight);
+      const valueLabel = isPercent ? formatPercent(value) : String(value);
+      return `
+        <g>
+          <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" rx="8" fill="#b45322" />
+          <text x="${x + barWidth / 2}" y="${Math.max(16, y - 8)}" text-anchor="middle" font-size="11" fill="#1f1a17">${escapeHtml(valueLabel)}</text>
+          <text x="${x + barWidth / 2}" y="${height - 34}" text-anchor="middle" font-size="10" fill="#6b625d">${escapeHtml(
+            String(item[labelKey] || "")
+          )}</text>
+          <text x="${x + barWidth / 2}" y="${height - 18}" text-anchor="middle" font-size="10" fill="#8b7a6d">${escapeHtml(
+            String(item.slotLabel || "")
+          )}</text>
+        </g>
+      `;
+    })
+    .join("");
+
+  return `
+    <div class="chart-scroll">
+      <svg viewBox="0 0 ${width} ${height}" class="chart-svg chart-svg-wide" role="img" aria-label="Bar chart">
+        <line x1="${paddingLeft}" y1="${chartTop}" x2="${paddingLeft}" y2="${height - chartBottom}" stroke="#d7cabd" />
+        <line x1="${paddingLeft}" y1="${height - chartBottom}" x2="${width - paddingRight}" y2="${height - chartBottom}" stroke="#d7cabd" />
+        ${bars}
+      </svg>
+    </div>
+  `;
+}
+
+function renderFifteenMinuteAnalysis(payload) {
+  const buckets = payload?.fifteenMinuteAnalysis?.buckets || [];
+  const selectedSeries = buckets.map((bucket) => ({
+    slotLabel: `Slot ${bucket.slotNumber}`,
+    timeLabel: bucket.timeRangeLabel,
+    permanentDropouts: bucket.permanentDropouts,
+  }));
+  chartFifteenMinuteSelectedEl.innerHTML = createBarChart(selectedSeries, "permanentDropouts", "timeLabel", false);
+  fifteenMinuteSelectedNoteEl.textContent = buckets.length
+    ? `Permanent dropouts are counted in 15-minute slots from ${formatTimeOnlyIst(payload.effectiveWindow?.startTime)} to ${formatTimeOnlyIst(payload.effectiveWindow?.endTime)}.`
+    : "No 15-minute dropout data available for this webinar.";
+
+  const historical = aggregatePayload?.historicalFifteenMinuteAnalysis || {};
+  const historicalBuckets = historical.buckets || [];
+  const historicalSeries = historicalBuckets.map((bucket) => ({
+    slotLabel: `Slot ${bucket.slotNumber}`,
+    timeLabel: bucket.offsetRangeLabel,
+    permanentDropoutPercent: bucket.permanentDropoutPercent,
+  }));
+  chartFifteenMinuteHistoricalEl.innerHTML = createBarChart(historicalSeries, "permanentDropoutPercent", "timeLabel", true);
+
+  if (!historicalBuckets.length) {
+    fifteenMinuteHistoricalNoteEl.textContent = "No historical 15-minute data available yet.";
+    return;
+  }
+
+  const highest = historical.highestDropSlot;
+  const lowest = historical.lowestDropSlot;
+  const parts = [];
+  if (highest) {
+    parts.push(`Highest historical drop: ${highest.offsetRangeLabel} (${formatPercent(highest.permanentDropoutPercent)})`);
+  }
+  if (lowest) {
+    parts.push(`Lowest historical drop: ${lowest.offsetRangeLabel} (${formatPercent(lowest.permanentDropoutPercent)})`);
+  }
+  parts.push("Historical percentages use only webinars that lasted into each slot.");
+  fifteenMinuteHistoricalNoteEl.textContent = parts.join(" • ");
+}
+
 function renderAggregate() {
   if (!aggregatePayload) {
     return;
@@ -274,13 +370,18 @@ function renderAggregate() {
   chartBeforePercentEl.innerHTML = createLineChart(aggregatePayload.series || [], "droppedBeforeCoursePercent", "serial", true);
   chartAfterPercentEl.innerHTML = createLineChart(aggregatePayload.series || [], "droppedDuringPitchWindowPercent", "serial", true);
   chartStayedPercentEl.innerHTML = createLineChart(aggregatePayload.series || [], "stayedTillEndPercent", "serial", true);
+  if (currentPayload) {
+    renderFifteenMinuteAnalysis(currentPayload);
+  }
 }
 
 let currentReportPath = "";
 
 function render(payload) {
+  currentPayload = payload;
   renderSummary(payload);
   renderTables(payload);
+  renderFifteenMinuteAnalysis(payload);
 }
 
 async function loadManifest() {

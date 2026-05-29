@@ -185,11 +185,69 @@ async function generateReport(entry) {
     summary: payload.summary,
     effectiveDurationSeconds: payload.effectiveWindow?.durationSeconds || 0,
     webinarDurationMinutes: payload.webinar.durationMinutes || 0,
+    fifteenMinuteAnalysis: payload.fifteenMinuteAnalysis || { bucketMinutes: 15, bucketCount: 0, buckets: [] },
   };
 }
 
 function average(values) {
   return values.length ? values.reduce((sum, value) => sum + Number(value || 0), 0) / values.length : 0;
+}
+
+function buildHistoricalFifteenMinuteAnalysis(manifest) {
+  const slotMap = new Map();
+
+  for (const webinar of manifest) {
+    const analysis = webinar.fifteenMinuteAnalysis || {};
+    const buckets = Array.isArray(analysis.buckets) ? analysis.buckets : [];
+    const uniqueParticipants = Number(webinar.summary?.uniqueParticipants || 0);
+
+    for (const bucket of buckets) {
+      const slotNumber = Number(bucket.slotNumber || 0);
+      if (!slotNumber) {
+        continue;
+      }
+
+      if (!slotMap.has(slotNumber)) {
+        slotMap.set(slotNumber, {
+          slotNumber,
+          startOffsetMinutes: bucket.startOffsetMinutes,
+          endOffsetMinutes: bucket.endOffsetMinutes,
+          offsetRangeLabel: bucket.offsetRangeLabel,
+          webinarCount: 0,
+          uniqueParticipantsBase: 0,
+          permanentDropouts: 0,
+        });
+      }
+
+      const slot = slotMap.get(slotNumber);
+      slot.webinarCount += 1;
+      slot.uniqueParticipantsBase += uniqueParticipants;
+      slot.permanentDropouts += Number(bucket.permanentDropouts || 0);
+    }
+  }
+
+  const buckets = [...slotMap.values()]
+    .sort((left, right) => left.slotNumber - right.slotNumber)
+    .map((slot) => ({
+      ...slot,
+      permanentDropoutPercent: slot.uniqueParticipantsBase
+        ? Number(((slot.permanentDropouts / slot.uniqueParticipantsBase) * 100).toFixed(2))
+        : 0,
+    }));
+
+  const highestDropSlot =
+    [...buckets].sort((left, right) => right.permanentDropoutPercent - left.permanentDropoutPercent)[0] || null;
+  const lowestDropSlot =
+    [...buckets]
+      .filter((slot) => slot.webinarCount > 0)
+      .sort((left, right) => left.permanentDropoutPercent - right.permanentDropoutPercent)[0] || null;
+
+  return {
+    bucketMinutes: 15,
+    buckets,
+    highestDropSlot,
+    lowestDropSlot,
+  };
 }
 
 function buildAggregate(manifest) {
@@ -230,6 +288,7 @@ function buildAggregate(manifest) {
       droppedDuringPitchWindowPercent: webinar.summary?.droppedDuringPitchWindowPercent || 0,
       stayedTillEndPercent: webinar.summary?.stayedTillEndPercent || 0,
     })),
+    historicalFifteenMinuteAnalysis: buildHistoricalFifteenMinuteAnalysis(manifest),
   };
 }
 

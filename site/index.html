@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Zoom Webinar Analysis</title>
-    <link rel="stylesheet" href="styles.css?v=20260529-12" />
+    <link rel="stylesheet" href="styles.css?v=20260529-13" />
   </head>
   <body>
     <main class="page">
@@ -37,6 +37,7 @@
           <button class="tile-button" data-view="beforeCourseView" type="button">Dropped before course</button>
           <button class="tile-button" data-view="afterCourseView" type="button">Dropped in next 30 min</button>
           <button class="tile-button" data-view="stayedTillEndView" type="button">Stayed till end</button>
+          <button class="tile-button" data-view="fifteenMinuteView" type="button">15-minute analysis</button>
           <button class="tile-button" data-view="consolidatedView" type="button">Consolidated report</button>
         </div>
       </section>
@@ -71,6 +72,25 @@
           <a id="stayedTillEndCsvLink" class="button small" href="#">Download CSV</a>
         </div>
         <div class="table-wrap" id="stayedTillEndTable"></div>
+      </section>
+
+      <section class="panel table-panel report-view" id="fifteenMinuteView">
+        <div class="chart-stack">
+          <article class="chart-card chart-card-wide">
+            <div class="section-head">
+              <h2>Webinar 15-minute permanent dropouts</h2>
+              <p class="chart-note" id="fifteenMinuteSelectedNote">Loading...</p>
+            </div>
+            <div id="chartFifteenMinuteSelected"></div>
+          </article>
+          <article class="chart-card chart-card-wide">
+            <div class="section-head">
+              <h2>Historical 15-minute dropout pattern</h2>
+              <p class="chart-note" id="fifteenMinuteHistoricalNote">Loading...</p>
+            </div>
+            <div id="chartFifteenMinuteHistorical"></div>
+          </article>
+        </div>
       </section>
 
       <section class="panel table-panel report-view" id="consolidatedView">
@@ -109,6 +129,6 @@
       </section>
     </main>
 
-    <script type="module" src="app.js?v=20260529-12"></script>
+    <script type="module" src="app.js?v=20260529-13"></script>
   </body>
 </html>

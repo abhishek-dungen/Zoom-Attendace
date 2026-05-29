@@ -1,29 +1,35 @@
-const summary = document.getElementById("summary");
-const statusEl = document.getElementById("status");
-const csvLink = document.getElementById("csvLink");
-const resultsBody = document.getElementById("resultsBody");
-const attendeeCommentsEl = document.getElementById("attendeeComments");
+const istTimeZone = "Asia/Kolkata";
 
+const statusEl = document.getElementById("status");
 const topicEl = document.getElementById("topic");
 const webinarIdEl = document.getElementById("webinarId");
-const uniqueAttendeesEl = document.getElementById("uniqueAttendees");
+const uniqueParticipantsEl = document.getElementById("uniqueParticipants");
 const sessionRecordsEl = document.getElementById("sessionRecords");
+const courseRevealTimeEl = document.getElementById("courseRevealTime");
+const effectiveDurationEl = document.getElementById("effectiveDuration");
+const droppedBeforeCourseMetricEl = document.getElementById("droppedBeforeCourseMetric");
+const droppedAfterCourseMetricEl = document.getElementById("droppedAfterCourseMetric");
+const stayedTillEndMetricEl = document.getElementById("stayedTillEndMetric");
+const effectiveWindowTextEl = document.getElementById("effectiveWindowText");
+const courseRevealSourceEl = document.getElementById("courseRevealSource");
 const generatedAtEl = document.getElementById("generatedAt");
+const chatAvailabilityEl = document.getElementById("chatAvailability");
+const methodologyListEl = document.getElementById("methodologyList");
+const uniqueParticipantsTableEl = document.getElementById("uniqueParticipantsTable");
+const beforeCourseTableEl = document.getElementById("beforeCourseTable");
+const afterCourseTableEl = document.getElementById("afterCourseTable");
+const stayedTillEndTableEl = document.getElementById("stayedTillEndTable");
 
-function getUniqueAttendeeCount(participants) {
-  const seen = new Set();
-
-  for (const participant of participants) {
-    const email = (participant.email || "").trim().toLowerCase();
-    const name = (participant.name || "").trim().toLowerCase();
-    const key = email || `name:${name}`;
-    seen.add(key);
-  }
-
-  return seen.size;
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
-function formatDate(value) {
+function formatDateIst(value) {
   if (!value) {
     return "-";
   }
@@ -33,36 +39,15 @@ function formatDate(value) {
     return value;
   }
 
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat("en-IN", {
+    timeZone: istTimeZone,
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
 }
 
-function parseOffsetTimeToAbsolute(webinarStartTime, offsetTime) {
-  if (!webinarStartTime || !offsetTime) {
-    return offsetTime || "-";
-  }
-
-  const startDate = new Date(webinarStartTime);
-  if (Number.isNaN(startDate.getTime())) {
-    return offsetTime;
-  }
-
-  const match = String(offsetTime).match(/^(\d{2}):(\d{2}):(\d{2})$/);
-  if (!match) {
-    return offsetTime;
-  }
-
-  const [, hours, minutes, seconds] = match;
-  const totalSeconds =
-    Number(hours) * 3600 + Number(minutes) * 60 + Number(seconds);
-  const absoluteDate = new Date(startDate.getTime() + totalSeconds * 1000);
-  return formatDate(absoluteDate.toISOString());
-}
-
 function formatDuration(seconds) {
-  const totalSeconds = Number(seconds || 0);
+  const totalSeconds = Math.max(0, Number(seconds || 0));
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
 
@@ -77,13 +62,8 @@ function formatDuration(seconds) {
   return `${hours}h ${minutes}m`;
 }
 
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
+function formatPercent(value) {
+  return `${Number(value || 0).toFixed(2)}%`;
 }
 
 function setStatus(message, isError = false) {
@@ -91,120 +71,150 @@ function setStatus(message, isError = false) {
   statusEl.classList.toggle("error", isError);
 }
 
-function renderTable(participants) {
-  const sortedParticipants = [...participants].sort(
-    (left, right) => Number(right.durationMinutes || 0) - Number(left.durationMinutes || 0)
-  );
+function renderMetricText(element, count, percent) {
+  element.textContent = `${count} (${formatPercent(percent)})`;
+}
 
-  if (!sortedParticipants.length) {
-    resultsBody.innerHTML = '<tr><td colspan="7" class="empty">No participants found in the latest published file.</td></tr>';
-    return;
+function buildTable(headers, rows, emptyMessage) {
+  if (!rows.length) {
+    return `<p class="empty">${escapeHtml(emptyMessage)}</p>`;
   }
 
-  resultsBody.innerHTML = sortedParticipants
+  const tableHeaders = headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("");
+  const tableRows = rows
     .map(
-      (participant) => `
+      (row) => `
         <tr>
-          <td>${participant.name || "-"}</td>
-          <td>${participant.email || "-"}</td>
-          <td>${formatDate(participant.joinTime)}</td>
-          <td>${formatDate(participant.leaveTime)}</td>
-          <td>${formatDuration(participant.durationMinutes)}</td>
-          <td>${participant.attentivenessScore || "-"}</td>
-          <td>${participant.status || "-"}</td>
+          ${row.map((value) => `<td>${value}</td>`).join("")}
         </tr>
       `
     )
     .join("");
+
+  return `
+    <table>
+      <thead>
+        <tr>${tableHeaders}</tr>
+      </thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+  `;
 }
 
-function renderAttendeeComments(uniqueAttendees, webinarStartTime) {
-  if (!attendeeCommentsEl) {
-    return;
-  }
+function participantRows(participants) {
+  return participants.map((participant) => [
+    escapeHtml(participant.name || "-"),
+    escapeHtml(participant.email || "-"),
+    escapeHtml(participant.phoneNumber || "-"),
+    escapeHtml(formatDateIst(participant.firstJoinTime)),
+    escapeHtml(formatDateIst(participant.finalDropTime)),
+    escapeHtml(participant.totalPresentFormatted || formatDuration(participant.totalPresentSeconds)),
+    escapeHtml(formatPercent(participant.attendancePercent)),
+    escapeHtml(String(participant.joins || 0)),
+  ]);
+}
 
-  if (!uniqueAttendees.length) {
-    attendeeCommentsEl.innerHTML = '<p class="empty">No attendee chat data published yet.</p>';
-    return;
-  }
+function renderTables(payload) {
+  const headers = [
+    "Name",
+    "Email",
+    "Phone Number",
+    "First Join (IST)",
+    "Final Drop (IST)",
+    "Total Present",
+    "Attendance %",
+    "Joins",
+  ];
 
-  attendeeCommentsEl.innerHTML = uniqueAttendees
-    .map((attendee) => {
-      const comments = attendee.chatComments || [];
-      const commentsHtml = comments.length
-        ? comments
-            .map(
-              (comment) => `
-                <li class="comment-item">
-                  <span class="comment-time">${escapeHtml(parseOffsetTimeToAbsolute(webinarStartTime, comment.time))}</span>
-                  <p>${escapeHtml(comment.message).replaceAll("\n", "<br />")}</p>
-                </li>
-              `
-            )
-            .join("")
-        : '<li class="comment-item empty-comment">No saved chat comments.</li>';
+  uniqueParticipantsTableEl.innerHTML = buildTable(
+    headers,
+    participantRows(payload.uniqueParticipants || []),
+    "No unique participants found."
+  );
+  beforeCourseTableEl.innerHTML = buildTable(
+    headers,
+    participantRows(payload.cohorts?.droppedBeforeCourse || []),
+    "Nobody dropped before the course reveal cutoff."
+  );
+  afterCourseTableEl.innerHTML = buildTable(
+    headers,
+    participantRows(payload.cohorts?.droppedDuringPitchWindow || []),
+    "Nobody dropped in the 30-minute window after course reveal."
+  );
+  stayedTillEndTableEl.innerHTML = buildTable(
+    headers,
+    participantRows(payload.cohorts?.stayedTillEnd || []),
+    "No participants matched the stayed-till-end rule."
+  );
+}
 
-      return `
-        <article class="attendee-card">
-          <div class="attendee-card-head">
-            <div>
-              <h3>${escapeHtml(attendee.name || "Unknown attendee")}</h3>
-              <p>${escapeHtml(attendee.email || "No email")}</p>
-            </div>
-            <div class="attendee-meta">
-              <span>${attendee.joins} joins</span>
-              <span>${formatDuration(attendee.totalDurationSeconds)}</span>
-              <span>${attendee.chatCommentsCount || 0} comments</span>
-            </div>
-          </div>
-          <ul class="comment-list">${commentsHtml}</ul>
-        </article>
-      `;
-    })
+function renderMethodology(payload) {
+  const methodologyItems = [
+    payload.methodology?.webinarLengthRule,
+    payload.methodology?.courseRevealRule,
+    payload.methodology?.stayedTillEndRule,
+    payload.courseReveal?.time
+      ? `Course reveal time used for this report: ${formatDateIst(payload.courseReveal.time)}.`
+      : "Course reveal time was not available.",
+  ].filter(Boolean);
+
+  methodologyListEl.innerHTML = methodologyItems
+    .map((item) => `<li>${escapeHtml(item)}</li>`)
     .join("");
 }
 
-function render(payload) {
-  const participants = payload.participants || [];
-  const uniqueAttendees = getUniqueAttendeeCount(participants);
-  const attendeeComments = payload.uniqueAttendees || [];
+function renderSummary(payload) {
+  topicEl.textContent = payload.webinar?.topic || "-";
+  webinarIdEl.textContent = payload.webinar?.id || "-";
+  uniqueParticipantsEl.textContent = String(payload.summary?.uniqueParticipants || 0);
+  sessionRecordsEl.textContent = String(payload.summary?.sessionRecords || 0);
+  courseRevealTimeEl.textContent = formatDateIst(payload.courseReveal?.time);
+  effectiveDurationEl.textContent = payload.effectiveWindow?.durationFormatted || "-";
 
-  summary.classList.remove("hidden");
-  if (topicEl) {
-    topicEl.textContent = payload.webinar.topic || "-";
-  }
-  if (webinarIdEl) {
-    webinarIdEl.textContent = payload.webinar.id || "-";
-  }
-  if (uniqueAttendeesEl) {
-    uniqueAttendeesEl.textContent = String(uniqueAttendees);
-  }
-  if (sessionRecordsEl) {
-    sessionRecordsEl.textContent = String(participants.length);
-  }
-  if (generatedAtEl) {
-    generatedAtEl.textContent = formatDate(payload.generatedAt);
-  }
-  if (csvLink) {
-    csvLink.classList.remove("hidden");
-  }
-  renderTable(participants);
-  renderAttendeeComments(attendeeComments, payload.webinar.startTime);
-  setStatus(`Loaded ${uniqueAttendees} unique attendees from ${participants.length} Zoom session records for webinar ${payload.webinar.id}.`);
+  renderMetricText(
+    droppedBeforeCourseMetricEl,
+    payload.summary?.droppedBeforeCourseCount || 0,
+    payload.summary?.droppedBeforeCoursePercent || 0
+  );
+  renderMetricText(
+    droppedAfterCourseMetricEl,
+    payload.summary?.droppedDuringPitchWindowCount || 0,
+    payload.summary?.droppedDuringPitchWindowPercent || 0
+  );
+  renderMetricText(
+    stayedTillEndMetricEl,
+    payload.summary?.stayedTillEndCount || 0,
+    payload.summary?.stayedTillEndPercent || 0
+  );
+
+  effectiveWindowTextEl.textContent = `${formatDateIst(payload.effectiveWindow?.startTime)} to ${formatDateIst(payload.effectiveWindow?.endTime)}`;
+  courseRevealSourceEl.textContent =
+    payload.courseReveal?.source === "admin_chat_detected"
+      ? "Detected from admin chat"
+      : "Fallback 8:40 PM IST";
+  generatedAtEl.textContent = formatDateIst(payload.generatedAt);
+  chatAvailabilityEl.textContent = `${payload.chatSummary?.totalChatMessages || 0} chat messages, ${payload.chatSummary?.attendeesWithChatComments || 0} attendees with saved chat`;
 }
 
-async function loadAttendance() {
+function render(payload) {
+  renderSummary(payload);
+  renderMethodology(payload);
+  renderTables(payload);
+  setStatus(`Loaded webinar ${payload.webinar.id} with ${payload.summary.uniqueParticipants} unique participants.`);
+}
+
+async function loadReport() {
   try {
     const response = await fetch(`data/latest.json?ts=${Date.now()}`);
     if (!response.ok) {
-      throw new Error("No published attendance file found yet.");
+      throw new Error("No published webinar report found yet.");
     }
 
     const payload = await response.json();
     render(payload);
   } catch (error) {
-    setStatus(error.message, true);
+    setStatus(error.message || "Failed to load webinar report.", true);
   }
 }
 
-loadAttendance();
+loadReport();

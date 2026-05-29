@@ -7,6 +7,11 @@ dotenv.config();
 const webinarId = process.env.WEBINAR_ID || process.argv[2];
 const webinarUuid = process.env.WEBINAR_UUID || process.argv[3] || "";
 const outputDir = path.resolve("site", "data");
+const istTimeZone = "Asia/Kolkata";
+const pitchWindowMinutes = 30;
+const fallbackCourseRevealHourIst = 20;
+const fallbackCourseRevealMinuteIst = 40;
+const stayedTillEndToleranceSeconds = 5 * 60;
 const requiredEnvVars = [
   "ZOOM_ACCOUNT_ID",
   "ZOOM_CLIENT_ID",
@@ -78,22 +83,131 @@ async function zoomRequest(token, endpoint, query = {}) {
   return data;
 }
 
+function normalizeText(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function parseIsoDate(value) {
+  if (!value) {
+    return null;
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function toIsoString(date) {
+  return date instanceof Date && !Number.isNaN(date.getTime()) ? date.toISOString() : "";
+}
+
+function getIstDateParts(isoString) {
+  const date = parseIsoDate(isoString);
+  if (!date) {
+    return null;
+  }
+
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: istTimeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+
+  const values = Object.fromEntries(
+    formatter
+      .formatToParts(date)
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, part.value])
+  );
+
+  return {
+    year: values.year,
+    month: values.month,
+    day: values.day,
+  };
+}
+
+function formatDateIst(isoString) {
+  const date = parseIsoDate(isoString);
+  if (!date) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat("en-IN", {
+    timeZone: istTimeZone,
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
+function formatDurationHoursMinutes(totalSeconds) {
+  const seconds = Math.max(0, Number(totalSeconds || 0));
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+
+  if (hours === 0) {
+    return `${minutes}m`;
+  }
+
+  if (minutes === 0) {
+    return `${hours}h`;
+  }
+
+  return `${hours}h ${minutes}m`;
+}
+
+function addSeconds(isoString, seconds) {
+  const date = parseIsoDate(isoString);
+  if (!date) {
+    return "";
+  }
+
+  return new Date(date.getTime() + seconds * 1000).toISOString();
+}
+
+function addMinutes(isoString, minutes) {
+  return addSeconds(isoString, minutes * 60);
+}
+
+function buildFallbackCourseRevealTime(webinarStartTime) {
+  const parts = getIstDateParts(webinarStartTime);
+  if (!parts) {
+    return "";
+  }
+
+  return `${parts.year}-${parts.month}-${parts.day}T${String(fallbackCourseRevealHourIst).padStart(2, "0")}:${String(fallbackCourseRevealMinuteIst).padStart(2, "0")}:00+05:30`;
+}
+
+function convertOffsetToAbsoluteTime(webinarStartTime, offsetTime) {
+  const webinarStart = parseIsoDate(webinarStartTime);
+  const match = String(offsetTime || "").match(/^(\d{2}):(\d{2}):(\d{2})$/);
+  if (!webinarStart || !match) {
+    return "";
+  }
+
+  const [, hours, minutes, seconds] = match;
+  const totalSeconds = Number(hours) * 3600 + Number(minutes) * 60 + Number(seconds);
+  return new Date(webinarStart.getTime() + totalSeconds * 1000).toISOString();
+}
+
 function normalizeParticipant(participant = {}) {
   return {
     id: participant.id || participant.user_id || "",
     name: participant.name || participant.user_name || "",
     email: participant.user_email || participant.email || "",
+    phoneNumber:
+      participant.phone_number ||
+      participant.phone ||
+      participant.user_phone ||
+      participant.registrant_phone ||
+      "",
     joinTime: participant.join_time || "",
     leaveTime: participant.leave_time || "",
-    durationMinutes: Number(participant.duration || 0),
+    durationSeconds: Number(participant.duration || 0),
     attentivenessScore: participant.attentiveness_score ?? "",
     customerKey: participant.customer_key || "",
     status: participant.status || "",
   };
-}
-
-function normalizeText(value) {
-  return String(value || "").trim().toLowerCase();
 }
 
 function attendeeKeyFromParticipant(participant = {}) {
@@ -102,15 +216,15 @@ function attendeeKeyFromParticipant(participant = {}) {
     return `email:${email}`;
   }
 
+  const phone = normalizeText(participant.phoneNumber);
+  if (phone) {
+    return `phone:${phone}`;
+  }
+
   return `name:${normalizeText(participant.name)}`;
 }
 
-function attendeeKeyFromIdentity(name = "", email = "") {
-  const normalizedEmail = normalizeText(email);
-  if (normalizedEmail) {
-    return `email:${normalizedEmail}`;
-  }
-
+function attendeeKeyFromIdentity(name = "") {
   return `name:${normalizeText(name)}`;
 }
 
@@ -133,9 +247,7 @@ async function getParticipants(token, id) {
     nextPageToken = page.next_page_token || "";
   } while (nextPageToken);
 
-  return participants.sort(
-    (left, right) => Number(right.durationMinutes || 0) - Number(left.durationMinutes || 0)
-  );
+  return participants;
 }
 
 async function getRecordingFiles(token, id, uuid = "") {
@@ -166,7 +278,7 @@ function parseChatTranscript(text) {
     if (match) {
       pushCurrent();
       current = {
-        time: match[1],
+        offsetTime: match[1],
         senderName: match[2].trim(),
         message: match[3] || "",
       };
@@ -184,7 +296,7 @@ function parseChatTranscript(text) {
   return entries;
 }
 
-async function getChatMessages(token, id, uuid = "") {
+async function getChatMessages(token, id, uuid = "", webinarStartTime = "") {
   let recordingFiles = [];
   try {
     recordingFiles = await getRecordingFiles(token, id, uuid);
@@ -194,6 +306,7 @@ async function getChatMessages(token, id, uuid = "") {
     }
     throw error;
   }
+
   const chatFile = recordingFiles.find((file) => file.file_type === "CHAT" && file.download_url);
   if (!chatFile) {
     return [];
@@ -210,11 +323,126 @@ async function getChatMessages(token, id, uuid = "") {
     fail(`Failed to download webinar chat transcript: ${text}`);
   }
 
-  return parseChatTranscript(text);
+  return parseChatTranscript(text).map((entry) => ({
+    ...entry,
+    absoluteTime: convertOffsetToAbsoluteTime(webinarStartTime, entry.offsetTime),
+  }));
 }
 
-function buildUniqueAttendees(participants, chatMessages) {
+function getOverlapSeconds(joinTime, leaveTime, windowStartTime, windowEndTime) {
+  const joinDate = parseIsoDate(joinTime);
+  const leaveDate = parseIsoDate(leaveTime);
+  const windowStartDate = parseIsoDate(windowStartTime);
+  const windowEndDate = parseIsoDate(windowEndTime);
+
+  if (!joinDate || !leaveDate || !windowStartDate || !windowEndDate) {
+    return 0;
+  }
+
+  const overlapStart = Math.max(joinDate.getTime(), windowStartDate.getTime());
+  const overlapEnd = Math.min(leaveDate.getTime(), windowEndDate.getTime());
+  if (overlapEnd <= overlapStart) {
+    return 0;
+  }
+
+  return Math.floor((overlapEnd - overlapStart) / 1000);
+}
+
+function getClippedInterval(joinTime, leaveTime, windowStartTime, windowEndTime) {
+  const joinDate = parseIsoDate(joinTime);
+  const leaveDate = parseIsoDate(leaveTime);
+  const windowStartDate = parseIsoDate(windowStartTime);
+  const windowEndDate = parseIsoDate(windowEndTime);
+
+  if (!joinDate || !leaveDate || !windowStartDate || !windowEndDate) {
+    return null;
+  }
+
+  const start = Math.max(joinDate.getTime(), windowStartDate.getTime());
+  const end = Math.min(leaveDate.getTime(), windowEndDate.getTime());
+  if (end <= start) {
+    return null;
+  }
+
+  return { start, end };
+}
+
+function getUnionDurationSeconds(intervals) {
+  if (!intervals.length) {
+    return 0;
+  }
+
+  const sortedIntervals = [...intervals].sort((left, right) => left.start - right.start);
+  const merged = [sortedIntervals[0]];
+
+  for (const interval of sortedIntervals.slice(1)) {
+    const last = merged[merged.length - 1];
+    if (interval.start <= last.end) {
+      last.end = Math.max(last.end, interval.end);
+      continue;
+    }
+
+    merged.push({ ...interval });
+  }
+
+  return merged.reduce((total, interval) => total + Math.floor((interval.end - interval.start) / 1000), 0);
+}
+
+function buildEffectiveWebinarWindow(webinar, chatMessages) {
+  const firstChatTime = chatMessages
+    .map((message) => message.absoluteTime)
+    .find((absoluteTime) => Boolean(absoluteTime));
+
+  return {
+    effectiveStartTime: firstChatTime || webinar.start_time || "",
+    effectiveEndTime: webinar.end_time || "",
+    effectiveStartSource: firstChatTime ? "first_chat_detected" : "webinar_start_time",
+  };
+}
+
+function detectCourseReveal(chatMessages, webinarStartTime, hostName) {
+  const hostNameKey = normalizeText(hostName);
+  const keywords = [
+    "http",
+    "https",
+    "discount",
+    "price",
+    "enroll",
+    "course",
+    "₹",
+    "rs",
+    "payu",
+  ];
+
+  const matchingMessage = chatMessages.find((message) => {
+    if (normalizeText(message.senderName) !== hostNameKey) {
+      return false;
+    }
+
+    const body = normalizeText(message.message);
+    return keywords.some((keyword) => body.includes(keyword));
+  });
+
+  if (matchingMessage?.absoluteTime) {
+    return {
+      courseRevealTime: matchingMessage.absoluteTime,
+      courseRevealSource: "admin_chat_detected",
+      courseRevealOffsetTime: matchingMessage.offsetTime,
+      courseRevealMessage: matchingMessage.message,
+    };
+  }
+
+  return {
+    courseRevealTime: buildFallbackCourseRevealTime(webinarStartTime),
+    courseRevealSource: "fallback_20_40_ist",
+    courseRevealOffsetTime: "",
+    courseRevealMessage: "",
+  };
+}
+
+function buildUniqueParticipants(participants, webinarWindow, webinarEndTime) {
   const attendeeMap = new Map();
+  const webinarEndFallback = webinarEndTime || "";
 
   for (const participant of participants) {
     const key = attendeeKeyFromParticipant(participant);
@@ -223,88 +451,223 @@ function buildUniqueAttendees(participants, chatMessages) {
         key,
         name: participant.name || "",
         email: participant.email || "",
+        phoneNumber: participant.phoneNumber || "",
+        firstJoinTime: participant.joinTime || "",
+        finalDropTime: participant.leaveTime || webinarEndFallback,
         joins: 0,
-        totalDurationSeconds: 0,
-        chatComments: [],
+        totalSessionSeconds: 0,
+        effectiveIntervals: [],
       });
     }
 
     const attendee = attendeeMap.get(key);
     attendee.joins += 1;
-    attendee.totalDurationSeconds += Number(participant.durationMinutes || 0);
-  }
+    attendee.totalSessionSeconds += Number(participant.durationSeconds || 0);
 
-  const nameOnlyIndex = new Map();
-  for (const attendee of attendeeMap.values()) {
-    const nameKey = normalizeText(attendee.name);
-    if (nameKey && !nameOnlyIndex.has(nameKey)) {
-      nameOnlyIndex.set(nameKey, attendee);
+    if (!attendee.phoneNumber && participant.phoneNumber) {
+      attendee.phoneNumber = participant.phoneNumber;
+    }
+
+    const firstJoinDate = parseIsoDate(attendee.firstJoinTime);
+    const participantJoinDate = parseIsoDate(participant.joinTime);
+    if (!firstJoinDate || (participantJoinDate && participantJoinDate < firstJoinDate)) {
+      attendee.firstJoinTime = participant.joinTime || attendee.firstJoinTime;
+    }
+
+    const attendeeDropDate = parseIsoDate(attendee.finalDropTime);
+    const participantDropDate = parseIsoDate(participant.leaveTime || webinarEndFallback);
+    if (!attendeeDropDate || (participantDropDate && participantDropDate > attendeeDropDate)) {
+      attendee.finalDropTime = participant.leaveTime || webinarEndFallback || attendee.finalDropTime;
+    }
+
+    const clippedInterval = getClippedInterval(
+      participant.joinTime,
+      participant.leaveTime || webinarEndFallback,
+      webinarWindow.effectiveStartTime,
+      webinarWindow.effectiveEndTime
+    );
+    if (clippedInterval) {
+      attendee.effectiveIntervals.push(clippedInterval);
     }
   }
 
-  for (const message of chatMessages) {
-    const nameKey = normalizeText(message.senderName);
-    const attendee =
-      attendeeMap.get(attendeeKeyFromIdentity(message.senderName)) ||
-      nameOnlyIndex.get(nameKey);
-
-    if (!attendee) {
-      continue;
-    }
-
-    attendee.chatComments.push({
-      time: message.time,
-      message: message.message,
-    });
-  }
+  const effectiveDurationSeconds = getOverlapSeconds(
+    webinarWindow.effectiveStartTime,
+    webinarWindow.effectiveEndTime,
+    webinarWindow.effectiveStartTime,
+    webinarWindow.effectiveEndTime
+  );
 
   return [...attendeeMap.values()]
+    .map((attendee) => ({
+      ...attendee,
+      totalPresentSeconds: getUnionDurationSeconds(attendee.effectiveIntervals),
+      attendancePercent: effectiveDurationSeconds
+        ? Number(
+            Math.min(100, (getUnionDurationSeconds(attendee.effectiveIntervals) / effectiveDurationSeconds) * 100).toFixed(2)
+          )
+        : 0,
+    }))
     .sort((left, right) => {
-      const durationDelta = right.totalDurationSeconds - left.totalDurationSeconds;
+      const durationDelta = right.totalPresentSeconds - left.totalPresentSeconds;
       if (durationDelta !== 0) {
         return durationDelta;
       }
 
       return left.name.localeCompare(right.name);
-    })
-    .map((attendee) => ({
-      ...attendee,
-      chatCommentsCount: attendee.chatComments.length,
-    }));
+    });
 }
 
-function buildCsvRows(rows) {
+function buildChatCommentsIndex(uniqueParticipants, chatMessages) {
+  const byKey = new Map(uniqueParticipants.map((participant) => [participant.key, []]));
+  const byName = new Map(uniqueParticipants.map((participant) => [attendeeKeyFromIdentity(participant.name), participant.key]));
+
+  for (const message of chatMessages) {
+    const exactKey = attendeeKeyFromIdentity(message.senderName);
+    const attendeeKey = byKey.has(exactKey) ? exactKey : byName.get(exactKey);
+    if (!attendeeKey || !byKey.has(attendeeKey)) {
+      continue;
+    }
+
+    byKey.get(attendeeKey).push({
+      offsetTime: message.offsetTime,
+      absoluteTime: message.absoluteTime,
+      senderName: message.senderName,
+      message: message.message,
+    });
+  }
+
+  return byKey;
+}
+
+function markParticipantCohorts(uniqueParticipants, chatCommentsIndex, courseRevealTime, webinarEndTime) {
+  const courseRevealDate = parseIsoDate(courseRevealTime);
+  const pitchWindowEndTime = addMinutes(courseRevealTime, pitchWindowMinutes);
+  const pitchWindowEndDate = parseIsoDate(pitchWindowEndTime);
+  const webinarEndDate = parseIsoDate(webinarEndTime);
+  const stayedTillEndCutoff = webinarEndDate
+    ? new Date(webinarEndDate.getTime() - stayedTillEndToleranceSeconds * 1000)
+    : null;
+
+  const enrichedParticipants = uniqueParticipants.map((participant) => {
+    const finalDropDate = parseIsoDate(participant.finalDropTime);
+    const droppedBeforeCourse = Boolean(
+      finalDropDate && courseRevealDate && finalDropDate < courseRevealDate
+    );
+    const droppedDuringPitchWindow = Boolean(
+      finalDropDate &&
+        courseRevealDate &&
+        pitchWindowEndDate &&
+        finalDropDate >= courseRevealDate &&
+        finalDropDate < pitchWindowEndDate
+    );
+    const stayedTillEnd = Boolean(
+      finalDropDate && stayedTillEndCutoff && finalDropDate >= stayedTillEndCutoff
+    );
+
+    return {
+      ...participant,
+      chatComments: chatCommentsIndex.get(participant.key) || [],
+      chatCommentsCount: (chatCommentsIndex.get(participant.key) || []).length,
+      droppedBeforeCourse,
+      droppedDuringPitchWindow,
+      stayedTillEnd,
+    };
+  });
+
+  return {
+    pitchWindowEndTime,
+    participants: enrichedParticipants,
+  };
+}
+
+function buildCohorts(uniqueParticipants) {
+  return {
+    droppedBeforeCourse: uniqueParticipants.filter((participant) => participant.droppedBeforeCourse),
+    droppedDuringPitchWindow: uniqueParticipants.filter((participant) => participant.droppedDuringPitchWindow),
+    stayedTillEnd: uniqueParticipants.filter((participant) => participant.stayedTillEnd),
+  };
+}
+
+function buildSummary(uniqueParticipants, sessionRecords, cohorts) {
+  const totalUniqueParticipants = uniqueParticipants.length || 0;
+  const percent = (count) =>
+    totalUniqueParticipants ? Number(((count / totalUniqueParticipants) * 100).toFixed(2)) : 0;
+
+  return {
+    uniqueParticipants: totalUniqueParticipants,
+    sessionRecords,
+    droppedBeforeCourseCount: cohorts.droppedBeforeCourse.length,
+    droppedBeforeCoursePercent: percent(cohorts.droppedBeforeCourse.length),
+    droppedDuringPitchWindowCount: cohorts.droppedDuringPitchWindow.length,
+    droppedDuringPitchWindowPercent: percent(cohorts.droppedDuringPitchWindow.length),
+    stayedTillEndCount: cohorts.stayedTillEnd.length,
+    stayedTillEndPercent: percent(cohorts.stayedTillEnd.length),
+  };
+}
+
+function buildParticipantRow(participant) {
+  return {
+    name: participant.name,
+    email: participant.email,
+    phoneNumber: participant.phoneNumber,
+    firstJoinTime: participant.firstJoinTime,
+    finalDropTime: participant.finalDropTime,
+    totalPresentSeconds: participant.totalPresentSeconds,
+    totalPresentFormatted: formatDurationHoursMinutes(participant.totalPresentSeconds),
+    attendancePercent: participant.attendancePercent,
+    joins: participant.joins,
+  };
+}
+
+function buildCsv(headers, rows) {
+  return [headers, ...rows]
+    .map((row) => row.map((cell) => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(","))
+    .join("\n");
+}
+
+function buildParticipantCsvRows(participants) {
   const headers = [
     "Name",
     "Email",
-    "Join Time",
-    "Leave Time",
-    "Duration (min)",
-    "Attentiveness Score",
-    "Status",
-    "Customer Key",
+    "Phone Number",
+    "First Join Time (IST)",
+    "Final Drop Time (IST)",
+    "Total Present",
+    "Attendance %",
+    "Join Count",
   ];
 
-  const csvRows = rows.map((row) => [
-    row.name,
-    row.email,
-    row.joinTime,
-    row.leaveTime,
-    row.durationMinutes,
-    row.attentivenessScore,
-    row.status,
-    row.customerKey,
+  const rows = participants.map((participant) => [
+    participant.name,
+    participant.email,
+    participant.phoneNumber,
+    formatDateIst(participant.firstJoinTime),
+    formatDateIst(participant.finalDropTime),
+    formatDurationHoursMinutes(participant.totalPresentSeconds),
+    participant.attendancePercent,
+    participant.joins,
   ]);
 
-  return [headers, ...csvRows]
-    .map((row) => row.map((cell) => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(","))
-    .join("\n");
+  return buildCsv(headers, rows);
 }
 
 async function writeOutputs(payload) {
   await fs.mkdir(outputDir, { recursive: true });
   await fs.writeFile(path.join(outputDir, "latest.json"), `${JSON.stringify(payload, null, 2)}\n`);
-  await fs.writeFile(path.join(outputDir, "latest.csv"), `${buildCsvRows(payload.participants)}\n`);
+  await fs.writeFile(path.join(outputDir, "latest.csv"), `${buildParticipantCsvRows(payload.uniqueParticipants)}\n`);
+  await fs.writeFile(
+    path.join(outputDir, "latest-before-course.csv"),
+    `${buildParticipantCsvRows(payload.cohorts.droppedBeforeCourse)}\n`
+  );
+  await fs.writeFile(
+    path.join(outputDir, "latest-after-course-30m.csv"),
+    `${buildParticipantCsvRows(payload.cohorts.droppedDuringPitchWindow)}\n`
+  );
+  await fs.writeFile(
+    path.join(outputDir, "latest-stayed-till-end.csv"),
+    `${buildParticipantCsvRows(payload.cohorts.stayedTillEnd)}\n`
+  );
 }
 
 async function main() {
@@ -317,9 +680,33 @@ async function main() {
   const token = await getAccessToken();
   const webinar = await zoomRequest(token, `/report/webinars/${encodeURIComponent(webinarId)}`);
   const participants = await getParticipants(token, webinarId);
-  const chatMessages = await getChatMessages(token, webinarId, webinarUuid);
-  const uniqueAttendees = buildUniqueAttendees(participants, chatMessages);
-  const totalDurationMinutes = participants.reduce((sum, row) => sum + row.durationMinutes, 0);
+  const chatMessages = await getChatMessages(token, webinarId, webinarUuid, webinar.start_time || "");
+  const webinarWindow = buildEffectiveWebinarWindow(webinar, chatMessages);
+  const effectiveDurationSeconds = getOverlapSeconds(
+    webinarWindow.effectiveStartTime,
+    webinarWindow.effectiveEndTime,
+    webinarWindow.effectiveStartTime,
+    webinarWindow.effectiveEndTime
+  );
+  const courseReveal = detectCourseReveal(chatMessages, webinar.start_time || "", webinar.user_name || "");
+  const uniqueParticipantsBase = buildUniqueParticipants(participants, webinarWindow, webinar.end_time || "");
+  const chatCommentsIndex = buildChatCommentsIndex(uniqueParticipantsBase, chatMessages);
+  const cohortMarked = markParticipantCohorts(
+    uniqueParticipantsBase,
+    chatCommentsIndex,
+    courseReveal.courseRevealTime,
+    webinar.end_time || ""
+  );
+  const uniqueParticipants = cohortMarked.participants.map(buildParticipantRow).map((row, index) => ({
+    ...row,
+    chatComments: cohortMarked.participants[index].chatComments,
+    chatCommentsCount: cohortMarked.participants[index].chatCommentsCount,
+    droppedBeforeCourse: cohortMarked.participants[index].droppedBeforeCourse,
+    droppedDuringPitchWindow: cohortMarked.participants[index].droppedDuringPitchWindow,
+    stayedTillEnd: cohortMarked.participants[index].stayedTillEnd,
+  }));
+  const cohorts = buildCohorts(uniqueParticipants);
+  const summary = buildSummary(uniqueParticipants, participants.length, cohorts);
 
   const payload = {
     generatedAt: new Date().toISOString(),
@@ -334,23 +721,47 @@ async function main() {
       durationMinutes: Number(webinar.duration || 0),
       participantsCount: webinar.participants_count ?? participants.length,
     },
-    summary: {
-      attendees: participants.length,
-      totalDurationMinutes,
-      averageDurationMinutes: participants.length
-        ? Number((totalDurationMinutes / participants.length).toFixed(2))
-        : 0,
+    methodology: {
+      webinarLengthRule:
+        webinarWindow.effectiveStartSource === "first_chat_detected"
+          ? "Attendance calculations use the first saved chat message time through webinar end."
+          : "Attendance calculations use webinar start time through webinar end because no chat was available.",
+      courseRevealRule:
+        courseReveal.courseRevealSource === "admin_chat_detected"
+          ? "Course reveal time was detected from the first admin chat message containing course/price/link details."
+          : "Course reveal time fell back to 8:40 PM IST because no matching admin chat message was available.",
+      stayedTillEndRule: `Stayed till end means the final drop time was within ${Math.floor(
+        stayedTillEndToleranceSeconds / 60
+      )} minutes of webinar end.`,
     },
+    effectiveWindow: {
+      startTime: webinarWindow.effectiveStartTime,
+      endTime: webinarWindow.effectiveEndTime,
+      durationSeconds: effectiveDurationSeconds,
+      durationFormatted: formatDurationHoursMinutes(effectiveDurationSeconds),
+      startSource: webinarWindow.effectiveStartSource,
+    },
+    courseReveal: {
+      time: courseReveal.courseRevealTime,
+      source: courseReveal.courseRevealSource,
+      offsetTime: courseReveal.courseRevealOffsetTime,
+      message: courseReveal.courseRevealMessage,
+      pitchWindowEndTime: cohortMarked.pitchWindowEndTime,
+    },
+    summary,
     chatSummary: {
       totalChatMessages: chatMessages.length,
-      attendeesWithChatComments: uniqueAttendees.filter((attendee) => attendee.chatCommentsCount > 0).length,
+      attendeesWithChatComments: uniqueParticipants.filter((participant) => participant.chatCommentsCount > 0).length,
     },
-    participants,
-    uniqueAttendees,
+    uniqueParticipants,
+    cohorts,
+    rawSessionParticipants: participants,
   };
 
   await writeOutputs(payload);
-  console.log(`Attendance written for webinar ${payload.webinar.id} with ${participants.length} attendees.`);
+  console.log(
+    `Attendance written for webinar ${payload.webinar.id} with ${payload.summary.uniqueParticipants} unique participants.`
+  );
 }
 
 main().catch((error) => fail(error.message || "Unexpected error."));

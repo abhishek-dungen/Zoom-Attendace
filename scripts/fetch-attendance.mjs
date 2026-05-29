@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const webinarId = process.env.WEBINAR_ID || process.argv[2];
+const webinarUuid = process.env.WEBINAR_UUID || process.argv[3] || "";
 const outputDir = path.resolve("site", "data");
 const requiredEnvVars = [
   "ZOOM_ACCOUNT_ID",
@@ -68,7 +69,10 @@ async function zoomRequest(token, endpoint, query = {}) {
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    fail(data.reason || data.message || `Zoom request failed: ${response.status}`);
+    const error = new Error(data.reason || data.message || `Zoom request failed: ${response.status}`);
+    error.status = response.status;
+    error.details = data;
+    throw error;
   }
 
   return data;
@@ -134,8 +138,9 @@ async function getParticipants(token, id) {
   );
 }
 
-async function getRecordingFiles(token, id) {
-  const data = await zoomRequest(token, `/meetings/${encodeURIComponent(id)}/recordings`);
+async function getRecordingFiles(token, id, uuid = "") {
+  const recordingTarget = uuid || id;
+  const data = await zoomRequest(token, `/meetings/${encodeURIComponent(recordingTarget)}/recordings`);
   return Array.isArray(data.recording_files) ? data.recording_files : [];
 }
 
@@ -179,8 +184,16 @@ function parseChatTranscript(text) {
   return entries;
 }
 
-async function getChatMessages(token, id) {
-  const recordingFiles = await getRecordingFiles(token, id);
+async function getChatMessages(token, id, uuid = "") {
+  let recordingFiles = [];
+  try {
+    recordingFiles = await getRecordingFiles(token, id, uuid);
+  } catch (error) {
+    if (error.status === 404) {
+      return [];
+    }
+    throw error;
+  }
   const chatFile = recordingFiles.find((file) => file.file_type === "CHAT" && file.download_url);
   if (!chatFile) {
     return [];
@@ -304,7 +317,7 @@ async function main() {
   const token = await getAccessToken();
   const webinar = await zoomRequest(token, `/report/webinars/${encodeURIComponent(webinarId)}`);
   const participants = await getParticipants(token, webinarId);
-  const chatMessages = await getChatMessages(token, webinarId);
+  const chatMessages = await getChatMessages(token, webinarId, webinarUuid);
   const uniqueAttendees = buildUniqueAttendees(participants, chatMessages);
   const totalDurationMinutes = participants.reduce((sum, row) => sum + row.durationMinutes, 0);
 
@@ -312,7 +325,7 @@ async function main() {
     generatedAt: new Date().toISOString(),
     webinar: {
       id: webinar.id || webinarId,
-      uuid: webinar.uuid || "",
+      uuid: webinar.uuid || webinarUuid || "",
       topic: webinar.topic || "",
       hostName: webinar.user_name || "",
       hostEmail: webinar.user_email || "",

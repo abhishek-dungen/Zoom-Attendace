@@ -13,6 +13,8 @@ const pitchWindowMinutes = 30;
 const fallbackCourseRevealHourIst = 20;
 const fallbackCourseRevealMinuteIst = 40;
 const stayedTillEndToleranceSeconds = 5 * 60;
+const adminNameOverride = process.env.ADMIN_NAME || "Abhishek Kumar";
+const adminEmailOverride = process.env.ADMIN_EMAIL || "excelbhaiya.systeme.oi@gmail.com";
 const requiredEnvVars = [
   "ZOOM_ACCOUNT_ID",
   "ZOOM_CLIENT_ID",
@@ -389,20 +391,25 @@ function getUnionDurationSeconds(intervals) {
   return merged.reduce((total, interval) => total + Math.floor((interval.end - interval.start) / 1000), 0);
 }
 
-function buildEffectiveWebinarWindow(webinar, chatMessages) {
-  const firstChatTime = chatMessages
+function isAdminSender(senderName, hostName) {
+  const sender = normalizeText(senderName);
+  return sender === normalizeText(hostName) || sender === normalizeText(adminNameOverride);
+}
+
+function buildEffectiveWebinarWindow(webinar, chatMessages, hostName) {
+  const firstParticipantChatTime = chatMessages
+    .filter((message) => !isAdminSender(message.senderName, hostName))
     .map((message) => message.absoluteTime)
     .find((absoluteTime) => Boolean(absoluteTime));
 
   return {
-    effectiveStartTime: firstChatTime || webinar.start_time || "",
+    effectiveStartTime: firstParticipantChatTime || webinar.start_time || "",
     effectiveEndTime: webinar.end_time || "",
-    effectiveStartSource: firstChatTime ? "first_chat_detected" : "webinar_start_time",
+    effectiveStartSource: firstParticipantChatTime ? "first_participant_chat_detected" : "webinar_start_time",
   };
 }
 
 function detectCourseReveal(chatMessages, webinarStartTime, hostName) {
-  const hostNameKey = normalizeText(hostName);
   const keywords = [
     "http",
     "https",
@@ -416,7 +423,7 @@ function detectCourseReveal(chatMessages, webinarStartTime, hostName) {
   ];
 
   const matchingMessage = chatMessages.find((message) => {
-    if (normalizeText(message.senderName) !== hostNameKey) {
+    if (!isAdminSender(message.senderName, hostName)) {
       return false;
     }
 
@@ -682,7 +689,7 @@ async function main() {
   const webinar = await zoomRequest(token, `/report/webinars/${encodeURIComponent(webinarId)}`);
   const participants = await getParticipants(token, webinarId);
   const chatMessages = await getChatMessages(token, webinarId, webinarUuid, webinar.start_time || "");
-  const webinarWindow = buildEffectiveWebinarWindow(webinar, chatMessages);
+  const webinarWindow = buildEffectiveWebinarWindow(webinar, chatMessages, webinar.user_name || adminNameOverride);
   const effectiveDurationSeconds = getOverlapSeconds(
     webinarWindow.effectiveStartTime,
     webinarWindow.effectiveEndTime,
@@ -724,8 +731,8 @@ async function main() {
     },
     methodology: {
       webinarLengthRule:
-        webinarWindow.effectiveStartSource === "first_chat_detected"
-          ? "Attendance calculations use the first saved chat message time through webinar end."
+        webinarWindow.effectiveStartSource === "first_participant_chat_detected"
+          ? "Attendance calculations use the first saved non-admin chat message time through webinar end."
           : "Attendance calculations use webinar start time through webinar end because no chat was available.",
       courseRevealRule:
         courseReveal.courseRevealSource === "admin_chat_detected"

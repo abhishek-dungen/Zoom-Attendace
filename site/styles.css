@@ -62,71 +62,44 @@ body {
   color: var(--text);
 }
 
-.summary {
+.overview-panel,
+.table-panel {
+  margin-top: 16px;
+}
+
+.overview-table {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0;
-  margin: 16px 0;
   background: rgba(255, 255, 255, 0.68);
   border: 1px solid var(--card-border);
   border-radius: 18px;
   overflow: hidden;
-  box-shadow: var(--shadow);
 }
 
-.card,
-.meta-card,
-.metric {
-  background: transparent;
-  border: 0;
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
-  padding: 13px 16px;
-}
-
-.card span,
-.meta-card span,
-.metric span {
-  display: inline-block;
-  color: var(--muted);
-  margin-bottom: 0;
-  font-size: 0.82rem;
-}
-
-.card strong,
-.meta-card strong,
-.metric strong {
-  font-size: 1rem;
-  line-height: 1.35;
-  font-weight: 600;
-  text-align: right;
-}
-
-.compact-card {
-  min-height: 0;
-}
-
-.summary .card,
-.metrics-grid .metric,
-.meta-grid .meta-card,
-.consolidated-grid .meta-card {
+.overview-row {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
   align-items: center;
   gap: 14px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--line);
 }
 
-.summary .card:last-child,
-.metrics-grid .metric:last-child,
-.meta-grid .meta-card:last-child,
-.consolidated-grid .meta-card:last-child {
+.overview-row:last-child {
   border-bottom: 0;
 }
 
-.metrics-panel,
-.tiles-panel,
-.table-panel {
-  margin-top: 16px;
+.overview-row span {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.overview-row strong {
+  font-size: 1rem;
+  line-height: 1.35;
+  font-weight: 600;
+  text-align: right;
 }
 
 .section-head {
@@ -159,25 +132,6 @@ body {
 
 .status.error {
   color: #b42318;
-}
-
-.metrics-grid,
-.meta-grid {
-  display: grid;
-  gap: 0;
-  background: rgba(255, 255, 255, 0.68);
-  border: 1px solid var(--card-border);
-  border-radius: 18px;
-  overflow: hidden;
-}
-
-.metrics-grid {
-  grid-template-columns: 1fr;
-  margin-bottom: 12px;
-}
-
-.meta-grid {
-  grid-template-columns: 1fr;
 }
 
 .report-tiles {
@@ -286,15 +240,8 @@ body {
   padding: 28px;
 }
 
-.consolidated-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0;
+.consolidated-table {
   margin-bottom: 16px;
-  background: rgba(255, 255, 255, 0.68);
-  border: 1px solid var(--card-border);
-  border-radius: 18px;
-  overflow: hidden;
 }
 
 .chart-grid {
@@ -338,17 +285,12 @@ body {
     padding: 14px;
   }
 
-  .summary .card,
-  .metrics-grid .metric,
-  .meta-grid .meta-card,
-  .consolidated-grid .meta-card {
+  .overview-row {
     grid-template-columns: 1fr;
     gap: 4px;
   }
 
-  .card strong,
-  .meta-card strong,
-  .metric strong {
+  .overview-row strong {
     text-align: left;
   }
 

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Zoom Webinar Analysis</title>
-    <link rel="stylesheet" href="styles.css?v=20260529-6" />
+    <link rel="stylesheet" href="styles.css?v=20260529-8" />
   </head>
   <body>
     <main class="page">
@@ -16,48 +16,45 @@
       </section>
 
       <section class="summary" id="summary">
-        <article class="card">
+        <article class="card compact-card">
           <span>Unique Participants</span>
           <strong id="uniqueParticipants">0</strong>
         </article>
-        <article class="card">
+        <article class="card compact-card">
           <span>Webinar Date</span>
           <strong id="webinarDate">-</strong>
         </article>
-        <article class="card">
+        <article class="card compact-card">
           <span>Effective Webinar Length</span>
           <strong id="effectiveDuration">-</strong>
         </article>
-        <article class="card">
+        <article class="card compact-card">
           <span>Course Reveal Time</span>
           <strong id="courseRevealTime">-</strong>
         </article>
       </section>
 
       <section class="panel metrics-panel">
-        <div class="section-head">
-          <h2>Retention Summary</h2>
-        </div>
         <div class="metrics-grid">
-          <article class="metric">
+          <article class="metric compact-card">
             <span>Dropped before course</span>
             <strong id="droppedBeforeCourseMetric">0</strong>
           </article>
-          <article class="metric">
+          <article class="metric compact-card">
             <span>Dropped in next 30 min</span>
             <strong id="droppedAfterCourseMetric">0</strong>
           </article>
-          <article class="metric">
+          <article class="metric compact-card">
             <span>Stayed till end</span>
             <strong id="stayedTillEndMetric">0</strong>
           </article>
         </div>
         <div class="meta-grid">
-          <article class="meta-card">
+          <article class="meta-card compact-card">
             <span>Length Source</span>
             <strong id="lengthSourceText">-</strong>
           </article>
-          <article class="meta-card">
+          <article class="meta-card compact-card">
             <span>Course reveal source</span>
             <strong id="courseRevealSource">-</strong>
           </article>
@@ -107,51 +104,44 @@
       </section>
 
       <section class="panel table-panel report-view" id="consolidatedView">
-        <div class="section-head">
-          <h2>Consolidated Report</h2>
-        </div>
         <div class="consolidated-grid">
-          <article class="meta-card">
+          <article class="meta-card compact-card">
             <span>Webinars considered</span>
             <strong id="aggregateWebinars">0</strong>
           </article>
-          <article class="meta-card">
+          <article class="meta-card compact-card">
             <span>Average webinar length</span>
             <strong id="aggregateAvgWebinarLength">-</strong>
           </article>
-          <article class="meta-card">
-            <span>Average participants</span>
-            <strong id="aggregateAvgParticipants">-</strong>
-          </article>
-          <article class="meta-card">
+          <article class="meta-card compact-card">
             <span>Average unique participants</span>
             <strong id="aggregateAvgUnique">-</strong>
           </article>
-          <article class="meta-card">
+          <article class="meta-card compact-card">
             <span>Average effective length</span>
             <strong id="aggregateAvgEffectiveLength">-</strong>
           </article>
-          <article class="meta-card">
+          <article class="meta-card compact-card">
             <span>Average dropped before course</span>
             <strong id="aggregateAvgBefore">-</strong>
           </article>
-          <article class="meta-card">
+          <article class="meta-card compact-card">
             <span>Average dropped in next 30 min</span>
             <strong id="aggregateAvgAfter">-</strong>
           </article>
-          <article class="meta-card">
+          <article class="meta-card compact-card">
             <span>Average stayed till end</span>
             <strong id="aggregateAvgStayed">-</strong>
           </article>
-          <article class="meta-card">
+          <article class="meta-card compact-card">
             <span>Historical drop before course %</span>
             <strong id="aggregatePctBefore">-</strong>
           </article>
-          <article class="meta-card">
+          <article class="meta-card compact-card">
             <span>Historical drop in next 30 min %</span>
             <strong id="aggregatePctAfter">-</strong>
           </article>
-          <article class="meta-card">
+          <article class="meta-card compact-card">
             <span>Historical stayed till end %</span>
             <strong id="aggregatePctStayed">-</strong>
           </article>
@@ -177,6 +167,6 @@
       </section>
     </main>
 
-    <script type="module" src="app.js?v=20260529-7"></script>
+    <script type="module" src="app.js?v=20260529-8"></script>
   </body>
 </html>

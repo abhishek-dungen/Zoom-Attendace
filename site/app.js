@@ -20,7 +20,6 @@ const afterCourseCsvLinkEl = document.getElementById("afterCourseCsvLink");
 const stayedTillEndCsvLinkEl = document.getElementById("stayedTillEndCsvLink");
 const aggregateWebinarsEl = document.getElementById("aggregateWebinars");
 const aggregateAvgWebinarLengthEl = document.getElementById("aggregateAvgWebinarLength");
-const aggregateAvgParticipantsEl = document.getElementById("aggregateAvgParticipants");
 const aggregateAvgUniqueEl = document.getElementById("aggregateAvgUnique");
 const aggregateAvgEffectiveLengthEl = document.getElementById("aggregateAvgEffectiveLength");
 const aggregateAvgBeforeEl = document.getElementById("aggregateAvgBefore");
@@ -262,7 +261,6 @@ function renderAggregate() {
 
   aggregateWebinarsEl.textContent = String(aggregatePayload.webinarsConsidered || 0);
   aggregateAvgWebinarLengthEl.textContent = formatDurationMinutes(aggregatePayload.averages?.webinarLengthMinutes || 0);
-  aggregateAvgParticipantsEl.textContent = formatAverageNumber(aggregatePayload.averages?.sessionRecords || 0);
   aggregateAvgUniqueEl.textContent = formatAverageNumber(aggregatePayload.averages?.uniqueParticipants || 0);
   aggregateAvgEffectiveLengthEl.textContent = formatDurationSeconds(aggregatePayload.averages?.effectiveWebinarLengthSeconds || 0);
   aggregateAvgBeforeEl.textContent = formatAverageNumber(aggregatePayload.averages?.droppedBeforeCourse || 0);

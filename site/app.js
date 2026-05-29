@@ -107,6 +107,13 @@ function formatTimeOnlyIst(value) {
     .toLowerCase();
 }
 
+function formatShortTimeRangeLabel(value) {
+  return String(value || "")
+    .replaceAll(" to ", "-")
+    .replaceAll(" am", "")
+    .replaceAll(" pm", "");
+}
+
 function formatDurationSeconds(totalSeconds) {
   const seconds = Math.max(0, Number(totalSeconds || 0));
   const hours = Math.floor(seconds / 3600);
@@ -264,7 +271,7 @@ function createBarChart(series, valueKey, labelKey, isPercent = false) {
     return `<p class="empty">No chart data available.</p>`;
   }
 
-  const width = Math.max(920, series.length * 96);
+  const width = Math.max(1200, series.length * 132);
   const height = 330;
   const paddingLeft = 36;
   const paddingRight = 16;
@@ -274,7 +281,7 @@ function createBarChart(series, valueKey, labelKey, isPercent = false) {
   const chartWidth = width - paddingLeft - paddingRight;
   const values = series.map((item) => Number(item[valueKey] || 0));
   const maxValue = Math.max(...values, 1);
-  const gap = 22;
+  const gap = 26;
   const barWidth = Math.max(28, (chartWidth - gap * (series.length - 1)) / series.length);
   const step = barWidth + gap;
 
@@ -315,7 +322,7 @@ function renderFifteenMinuteAnalysis(payload) {
   const buckets = payload?.fifteenMinuteAnalysis?.buckets || [];
   const selectedSeries = buckets.map((bucket) => ({
     slotLabel: `Slot ${bucket.slotNumber}`,
-    timeLabel: bucket.timeRangeLabel,
+    timeLabel: formatShortTimeRangeLabel(bucket.timeRangeLabel),
     permanentDropouts: bucket.permanentDropouts,
   }));
   chartFifteenMinuteSelectedEl.innerHTML = createBarChart(selectedSeries, "permanentDropouts", "timeLabel", false);
@@ -327,7 +334,7 @@ function renderFifteenMinuteAnalysis(payload) {
   const historicalBuckets = historical.buckets || [];
   const historicalSeries = historicalBuckets.map((bucket) => ({
     slotLabel: `Slot ${bucket.slotNumber}`,
-    timeLabel: bucket.offsetRangeLabel,
+    timeLabel: bucket.offsetRangeLabel.replace(" min", "m"),
     permanentDropoutPercent: bucket.permanentDropoutPercent,
   }));
   chartFifteenMinuteHistoricalEl.innerHTML = createBarChart(historicalSeries, "permanentDropoutPercent", "timeLabel", true);

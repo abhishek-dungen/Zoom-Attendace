@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-31T18:20:49.987Z",
+  "generatedAt": "2026-05-31T18:29:55.310Z",
   "webinar": {
     "id": 89051688719,
     "uuid": "a5lkWUK/Saiaof9EmOKOfQ==",
@@ -43,6 +43,12 @@
   "chatSummary": {
     "totalChatMessages": 0,
     "attendeesWithChatComments": 0
+  },
+  "registrantSummary": {
+    "totalRegistrants": 94,
+    "registrantsWithPhoneNumber": 0,
+    "matchedSessionRecordsWithPhoneNumber": 0,
+    "uniqueParticipantsWithPhoneNumber": 0
   },
   "fifteenMinuteAnalysis": {
     "bucketMinutes": 15,

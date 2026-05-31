@@ -230,6 +230,18 @@ function normalizeParticipant(participant = {}) {
   };
 }
 
+function normalizeRegistrant(registrant = {}) {
+  const name = [registrant.first_name, registrant.last_name].filter(Boolean).join(" ").trim();
+
+  return {
+    id: registrant.id || "",
+    name: registrant.name || name,
+    email: registrant.email || "",
+    phoneNumber: registrant.phone || registrant.phone_number || "",
+    status: registrant.status || "",
+  };
+}
+
 function attendeeKeyFromParticipant(participant = {}) {
   const email = normalizeText(participant.email);
   if (email) {
@@ -246,6 +258,43 @@ function attendeeKeyFromParticipant(participant = {}) {
 
 function attendeeKeyFromIdentity(name = "") {
   return `name:${normalizeText(name)}`;
+}
+
+function mergeRegistrantPhones(participants, registrants) {
+  const phoneByEmail = new Map();
+  const phoneByName = new Map();
+
+  for (const registrant of registrants) {
+    if (!registrant.phoneNumber) {
+      continue;
+    }
+
+    const email = normalizeText(registrant.email);
+    if (email) {
+      phoneByEmail.set(email, registrant.phoneNumber);
+    }
+
+    const name = normalizeText(registrant.name);
+    if (name && !phoneByName.has(name)) {
+      phoneByName.set(name, registrant.phoneNumber);
+    }
+  }
+
+  return participants.map((participant) => {
+    if (participant.phoneNumber) {
+      return participant;
+    }
+
+    const phoneNumber =
+      phoneByEmail.get(normalizeText(participant.email)) ||
+      phoneByName.get(normalizeText(participant.name)) ||
+      "";
+
+    return {
+      ...participant,
+      phoneNumber,
+    };
+  });
 }
 
 async function getParticipants(token, id) {
@@ -268,6 +317,25 @@ async function getParticipants(token, id) {
   } while (nextPageToken);
 
   return participants;
+}
+
+async function getRegistrants(token, id) {
+  const registrants = [];
+  let nextPageToken = "";
+
+  do {
+    const page = await zoomRequest(token, `/webinars/${encodeURIComponent(id)}/registrants`, {
+      page_size: 300,
+      status: "approved",
+      next_page_token: nextPageToken,
+    });
+
+    const rows = Array.isArray(page.registrants) ? page.registrants : [];
+    registrants.push(...rows.map(normalizeRegistrant));
+    nextPageToken = page.next_page_token || "";
+  } while (nextPageToken);
+
+  return registrants;
 }
 
 async function getRecordingFiles(token, id, uuid = "") {
@@ -772,7 +840,9 @@ async function main() {
 
   const token = await getAccessToken();
   const webinar = await zoomRequest(token, `/report/webinars/${encodeURIComponent(webinarId)}`);
-  const participants = await getParticipants(token, webinarId);
+  const sessionParticipants = await getParticipants(token, webinarId);
+  const registrants = await getRegistrants(token, webinarId);
+  const participants = mergeRegistrantPhones(sessionParticipants, registrants);
   const chatMessages = await getChatMessages(token, webinarId, webinarUuid, webinar.start_time || "");
   const webinarWindow = buildEffectiveWebinarWindow(webinar, chatMessages, webinar.user_name || adminNameOverride);
   const effectiveDurationSeconds = getOverlapSeconds(
@@ -846,6 +916,12 @@ async function main() {
     chatSummary: {
       totalChatMessages: chatMessages.length,
       attendeesWithChatComments: uniqueParticipants.filter((participant) => participant.chatCommentsCount > 0).length,
+    },
+    registrantSummary: {
+      totalRegistrants: registrants.length,
+      registrantsWithPhoneNumber: registrants.filter((registrant) => registrant.phoneNumber).length,
+      matchedSessionRecordsWithPhoneNumber: participants.filter((participant) => participant.phoneNumber).length,
+      uniqueParticipantsWithPhoneNumber: uniqueParticipants.filter((participant) => participant.phoneNumber).length,
     },
     fifteenMinuteAnalysis,
     uniqueParticipants,

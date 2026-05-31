@@ -212,11 +212,11 @@ function renderSummary(payload) {
   lengthSourceTextEl.textContent =
     payload.effectiveWindow?.startSource === "first_participant_chat_detected"
       ? "Calculated from first participant chat"
-      : "Calculated from webinar start time";
+      : "No Zoom chat file found; using webinar start time";
   courseRevealSourceEl.textContent =
     payload.courseReveal?.source === "admin_chat_detected"
       ? "Detected from admin chat"
-      : "Fallback 8:40 PM IST";
+      : "No Zoom chat file found; fallback 8:40 PM IST";
 
   uniqueCsvLinkEl.href = webinarManifest.find((item) => item.reportJson === currentReportPath)?.uniqueCsv || "#";
   beforeCourseCsvLinkEl.href = webinarManifest.find((item) => item.reportJson === currentReportPath)?.beforeCourseCsv || "#";

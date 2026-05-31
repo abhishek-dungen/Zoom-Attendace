@@ -339,9 +339,28 @@ async function getRegistrants(token, id) {
 }
 
 async function getRecordingFiles(token, id, uuid = "") {
-  const recordingTarget = uuid || id;
-  const data = await zoomRequest(token, `/meetings/${encodeURIComponent(recordingTarget)}/recordings`);
-  return Array.isArray(data.recording_files) ? data.recording_files : [];
+  const recordingTargets = [...new Set([uuid, id].filter(Boolean))];
+  let notFoundError = null;
+
+  for (const recordingTarget of recordingTargets) {
+    try {
+      const data = await zoomRequest(token, `/meetings/${encodeURIComponent(recordingTarget)}/recordings`);
+      return Array.isArray(data.recording_files) ? data.recording_files : [];
+    } catch (error) {
+      if (error.status === 404) {
+        notFoundError = error;
+        continue;
+      }
+
+      throw error;
+    }
+  }
+
+  if (notFoundError) {
+    throw notFoundError;
+  }
+
+  return [];
 }
 
 function parseChatTranscript(text) {

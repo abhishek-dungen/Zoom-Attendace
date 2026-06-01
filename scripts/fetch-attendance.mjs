@@ -403,37 +403,122 @@ function parseChatTranscript(text) {
   return entries;
 }
 
+function parseLocalChatTranscript(text, webinarStartTime) {
+  const entries = [];
+  const lines = String(text || "").replace(/\r\n/g, "\n").split("\n");
+  let current = null;
+  const headerPattern = /^(\d{2}:\d{2}:\d{2})\s+From\s+(.+?)\s+to\s+(.+?):/;
+  
+  const webinarStart = parseIsoDate(webinarStartTime);
+  const dateParts = getIstDateParts(webinarStartTime);
+
+  const pushCurrent = () => {
+    if (!current) return;
+    current.message = current.message.trim();
+    if (current.message) {
+      entries.push(current);
+    }
+    current = null;
+  };
+
+  for (const line of lines) {
+    const match = line.match(headerPattern);
+    if (match) {
+      pushCurrent();
+      const timeStr = match[1];
+      const senderName = match[2].trim();
+      
+      let absoluteTime = "";
+      let offsetTime = "";
+      if (dateParts && webinarStart) {
+        const localIso = `${dateParts.year}-${dateParts.month}-${dateParts.day}T${timeStr}+05:30`;
+        const dateObj = new Date(localIso);
+        if (!isNaN(dateObj.getTime())) {
+          absoluteTime = dateObj.toISOString();
+          
+          const diffMs = dateObj.getTime() - webinarStart.getTime();
+          const diffSec = Math.max(0, Math.floor(diffMs / 1000));
+          const h = String(Math.floor(diffSec / 3600)).padStart(2, "0");
+          const m = String(Math.floor((diffSec % 3600) / 60)).padStart(2, "0");
+          const s = String(diffSec % 60).padStart(2, "0");
+          offsetTime = `${h}:${m}:${s}`;
+        }
+      }
+      
+      current = {
+        offsetTime: offsetTime || timeStr,
+        absoluteTime,
+        senderName,
+        message: "",
+      };
+      continue;
+    }
+
+    if (!current) continue;
+
+    let cleanLine = line;
+    if (cleanLine.startsWith("\t")) {
+      cleanLine = cleanLine.substring(1);
+    } else {
+      cleanLine = cleanLine.trim();
+    }
+    current.message += current.message ? `\n${cleanLine}` : cleanLine;
+  }
+
+  pushCurrent();
+  return entries;
+}
+
 async function getChatMessages(token, id, uuid = "", webinarStartTime = "") {
-  let recordingFiles = [];
+  // Check for local manually-saved chat file first in site/data/local-chats/
+  const localPath = path.join("site", "data", "local-chats", `${id}.txt`);
+  let text = "";
+  let isLocal = false;
+
   try {
-    recordingFiles = await getRecordingFiles(token, id, uuid);
-  } catch (error) {
-    if (error.status === 404) {
+    text = await fs.readFile(localPath, "utf8");
+    isLocal = true;
+    console.log(`Loaded chat from local file: ${localPath}`);
+  } catch (err) {
+    // If local file doesn't exist, proceed with Zoom API download
+    let recordingFiles = [];
+    try {
+      recordingFiles = await getRecordingFiles(token, id, uuid);
+    } catch (error) {
+      if (error.status === 404) {
+        return [];
+      }
+      throw error;
+    }
+
+    const chatFile = recordingFiles.find((file) => file.file_type === "CHAT" && file.download_url);
+    if (!chatFile) {
       return [];
     }
-    throw error;
+
+    const response = await fetch(chatFile.download_url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    text = await response.text();
+    if (!response.ok) {
+      fail(`Failed to download webinar chat transcript: ${text}`);
+    }
   }
 
-  const chatFile = recordingFiles.find((file) => file.file_type === "CHAT" && file.download_url);
-  if (!chatFile) {
-    return [];
+  // Detect which format the chat text is in (Zoom API tab-separated format or manually saved format)
+  const isManuallySavedFormat = text.split("\n").some(line => /^(\d{2}:\d{2}:\d{2})\s+From\s+.+?\s+to\s+.+?:/.test(line));
+
+  if (isManuallySavedFormat) {
+    return parseLocalChatTranscript(text, webinarStartTime);
+  } else {
+    return parseChatTranscript(text).map((entry) => ({
+      ...entry,
+      absoluteTime: convertOffsetToAbsoluteTime(webinarStartTime, entry.offsetTime),
+    }));
   }
-
-  const response = await fetch(chatFile.download_url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  const text = await response.text();
-  if (!response.ok) {
-    fail(`Failed to download webinar chat transcript: ${text}`);
-  }
-
-  return parseChatTranscript(text).map((entry) => ({
-    ...entry,
-    absoluteTime: convertOffsetToAbsoluteTime(webinarStartTime, entry.offsetTime),
-  }));
 }
 
 function getOverlapSeconds(joinTime, leaveTime, windowStartTime, windowEndTime) {

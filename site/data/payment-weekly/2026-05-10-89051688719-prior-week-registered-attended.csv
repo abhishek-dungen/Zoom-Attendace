@@ -1,16 +1,16 @@
-Name,Email,Phone,Registration Date,Registration Type,Gateway,Payment ID,Amount,Join Time,Final Drop Time,Total Present,Attendance %,Match Method,Purpose
-Abhishek Kumar,excelbhaiya.systeme.oi@gmail.com,+918196810397,2025-12-04T16:43:00.000Z,Bundle only,Instamojo,MOJO5c04305Q81649453,99,2026-05-10T12:58:34Z,2026-05-10T17:50:08Z,4h 51m,100,name fallback,Ultimate Resource Bundle
-Malatesh Hemagiri,malateshhemagiri2@gmail.com,+919741816072,2026-04-16T21:04:21.000Z,Webinar only,Cashfree,5380217157,99,2026-05-10T13:35:12Z,2026-05-10T17:50:08Z,4h 14m,87.44,email,CFPay_excel-career-3hours-live-masterclass_ff4562ff_1776373408937
-manoj kumar,gmanojnair2002@gmail.com,+919746950765,2026-02-12T03:54:00.000Z,Webinar only,Instamojo,MOJO6212305Q03606691,99,2026-05-10T13:53:26Z,2026-05-10T17:50:07Z,3h 48m,78.31,email,3 Hours Excel Career Masterclass
-Vikas Singh,anishrajput077@gmail.com,+919718554227,2026-03-05T13:07:00.000Z,Webinar only,Instamojo,MOJO6305K05Q67414076,99,2026-05-10T13:33:13Z,2026-05-10T14:55:46Z,1h 22m,28.31,name fallback,3 Hours Excel Career Masterclass
-Sakshi Goyal,sako16goyal@gmail.com,+918003033888,2026-04-21T10:40:33.000Z,Combo: webinar + bundle,Cashfree,5410607341,198,2026-05-10T13:43:12Z,2026-05-10T14:55:22Z,1h 12m,24.75,email,CFPay_excel-career-3hours-live-masterclass_4dc0e843_1776767951689
-Rajeev Sharma,mrrajeevsha@gmail.com,+918210934194,2026-04-27T04:13:00.000Z,Combo: webinar + bundle,Instamojo,MOJO6427W05Q16175865,198,2026-05-10T13:31:39Z,2026-05-10T14:43:04Z,1h 11m,24.49,email,Masterclass + Ultimate Resource Bundle
-Tabraiz Shaikh,mohammadtabraiz36@gmail.com,+918658938987,2026-02-15T07:55:00.000Z,Webinar only,Instamojo,MOJO6215X05Q94161364,99,2026-05-10T15:37:33Z,2026-05-10T16:14:54Z,37m,12.81,email,3 Hours Excel Career Masterclass
-Harshad Jadhav,harshad.jadhav@gmail.com,+919890907567,2026-02-13T18:36:00.000Z,Webinar only,Instamojo,MOJO6213Q05Q05826661,99,2026-05-10T13:31:55Z,2026-05-10T14:06:08Z,34m,11.74,email,3 Hours Excel Career Masterclass
-Jayant Tirole,tirolejayant@gmail.com,+917828618234,2026-03-15T10:35:00.000Z,Combo: webinar + bundle,Instamojo,MOJO6315905Q32478814,198,2026-05-10T14:02:58Z,2026-05-10T14:32:10Z,29m,10.01,email,Masterclass + Ultimate Resource Bundle
-Gurvinder Pal Singh,gpsinghita@gmail.com,+919165702007,2026-04-12T13:51:29.000Z,Webinar only,Cashfree,5351385969,99,2026-05-10T14:05:57Z,2026-05-10T14:27:24Z,21m,7.36,email,CFPay_excel-career-3hours-live-masterclass_5130ce08_1776001874757
-pragya chauhan,111pragyachauhan@gmail.com,+917000680027,2026-04-24T09:34:00.000Z,Webinar only,Instamojo,MOJO6424Q05Q62390174,99,2026-05-10T14:09:48Z,2026-05-10T14:25:54Z,16m,5.52,email,3 Hours Excel Career Masterclass
-Ashish Sharma,aksharmagsm@gmail.com,+919540499142,2026-01-13T12:21:00.000Z,Webinar only,Instamojo,MOJO6113Q05Q21909430,99,2026-05-10T13:41:41Z,2026-05-10T13:56:17Z,14m,5.01,name fallback,3 Hours Excel Career Masterclass
-Gaurav Sharma,gauravsharma0416@gmail.com,+919998147275,2025-12-25T23:16:00.000Z,Webinar only,Instamojo,MOJO5c25Q05D25296804,99,2026-05-10T14:42:57Z,2026-05-10T14:44:24Z,1m,0.5,name fallback,3 Hours Excel Career Masterclass
-Ritu Raj,ritikraj7401@gmail.com,+919205978143,2025-12-15T05:18:00.000Z,Bundle only,Instamojo,MOJO5c15T05Q09680740,99,2026-05-10T14:02:36Z,2026-05-10T14:03:19Z,0m,0.25,email,Ultimate Resource Bundle
-Jatin S,gtusir@gmail.com,+917217828102,2026-01-26T03:22:00.000Z,Webinar only,Instamojo,MOJO6126A05Q98587638,99,2026-05-10T13:45:55Z,2026-05-10T13:46:37Z,0m,0.24,email,3 Hours Excel Career Masterclass
+Name,Email,Phone,Registration Date,Registration Type,Join Time,Final Drop Time,Total Present,Attendance %
+Abhishek Kumar,excelbhaiya.systeme.oi@gmail.com,+918196810397,2025-12-04,Combo,2026-05-10T12:58:34Z,2026-05-10T17:50:08Z,4h 51m,100
+Malatesh Hemagiri,malateshhemagiri2@gmail.com,+919741816072,2026-04-17,Webinar,2026-05-10T13:35:12Z,2026-05-10T17:50:08Z,4h 14m,87.44
+manoj kumar,gmanojnair2002@gmail.com,+919746950765,2026-02-12,Webinar,2026-05-10T13:53:26Z,2026-05-10T17:50:07Z,3h 48m,78.31
+Vikas Singh,anishrajput077@gmail.com,+919718554227,2026-03-05,Webinar,2026-05-10T13:33:13Z,2026-05-10T14:55:46Z,1h 22m,28.31
+Sakshi Goyal,sako16goyal@gmail.com,+918003033888,2026-04-21,Combo,2026-05-10T13:43:12Z,2026-05-10T14:55:22Z,1h 12m,24.75
+Rajeev Sharma,mrrajeevsha@gmail.com,+918210934194,2026-04-27,Combo,2026-05-10T13:31:39Z,2026-05-10T14:43:04Z,1h 11m,24.49
+Tabraiz Shaikh,mohammadtabraiz36@gmail.com,+918658938987,2026-02-15,Webinar,2026-05-10T15:37:33Z,2026-05-10T16:14:54Z,37m,12.81
+Harshad Jadhav,harshad.jadhav@gmail.com,+919890907567,2026-02-14,Webinar,2026-05-10T13:31:55Z,2026-05-10T14:06:08Z,34m,11.74
+Jayant Tirole,tirolejayant@gmail.com,+917828618234,2026-03-15,Combo,2026-05-10T14:02:58Z,2026-05-10T14:32:10Z,29m,10.01
+Gurvinder Pal Singh,gpsinghita@gmail.com,+919165702007,2026-04-12,Webinar,2026-05-10T14:05:57Z,2026-05-10T14:27:24Z,21m,7.36
+pragya chauhan,111pragyachauhan@gmail.com,+917000680027,2026-04-24,Webinar,2026-05-10T14:09:48Z,2026-05-10T14:25:54Z,16m,5.52
+Ashish Sharma,aksharmagsm@gmail.com,+919540499142,2026-01-13,Webinar,2026-05-10T13:41:41Z,2026-05-10T13:56:17Z,14m,5.01
+Gaurav Sharma,gauravsharma0416@gmail.com,+919998147275,2025-12-26,Webinar,2026-05-10T14:42:57Z,2026-05-10T14:44:24Z,1m,0.5
+Ritu Raj,ritikraj7401@gmail.com,+919205978143,2025-12-15,Combo,2026-05-10T14:02:36Z,2026-05-10T14:03:19Z,0m,0.25
+Jatin S,gtusir@gmail.com,+917217828102,2026-01-26,Webinar,2026-05-10T13:45:55Z,2026-05-10T13:46:37Z,0m,0.24

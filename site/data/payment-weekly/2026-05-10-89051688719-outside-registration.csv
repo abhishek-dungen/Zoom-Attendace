@@ -1,19 +1,19 @@
-Name,Email,Phone,Registration Date,Registration Type,Gateway,Payment ID,Amount,Join Time,Final Drop Time,Total Present,Attendance %,Match Method,Purpose
-Mr Rahul,uk07rahul1196@gmail.com,-,,Not found in payment gateways,,,,2026-05-10T13:11:06Z,2026-05-10T17:50:07Z,4h 39m,95.7,not matched,
-Aditya Parashar,parasharaditya795@gmail.com,-,,Not found in payment gateways,,,,2026-05-10T13:28:34Z,2026-05-10T17:50:07Z,4h 21m,89.71,not matched,
-Aman Srivastava,amansrivastava1211@gmail.com,-,,Not found in payment gateways,,,,2026-05-10T13:43:48Z,2026-05-10T17:05:05Z,3h 21m,69.04,not matched,
-sunil darro,sunilkumardarr@gmail.com,-,,Not found in payment gateways,,,,2026-05-10T13:38:47Z,2026-05-10T16:56:22Z,2h 50m,58.55,not matched,
-Sarvar Naveed,trulymaster@gmail.com,-,,Not found in payment gateways,,,,2026-05-10T13:42:21Z,2026-05-10T16:31:11Z,2h 48m,57.91,not matched,
-Ravinderjit Kaur,kravinderjit785@gmail.com,-,,Not found in payment gateways,,,,2026-05-10T13:36:35Z,2026-05-10T15:44:09Z,2h 7m,43.75,not matched,
-Neha Deshmukh,nehasdeshmukh12@outlook.com,-,,Not found in payment gateways,,,,2026-05-10T13:40:00Z,2026-05-10T15:10:20Z,1h 30m,30.98,not matched,
-Mohd moid Afsar,moidafsar04@gmail.com,-,,Not found in payment gateways,,,,2026-05-10T15:46:36Z,2026-05-10T16:36:57Z,41m,14.38,not matched,
-Omraj Raj,kunalkumar23august@gmail.com,-,,Not found in payment gateways,,,,2026-05-10T13:35:08Z,2026-05-10T13:59:58Z,24m,8.51,not matched,
-Noor Mohammad,noormohd139802@gmail.com,-,,Not found in payment gateways,,,,2026-05-10T14:01:27Z,2026-05-10T14:17:56Z,16m,5.65,not matched,
-Jaideep Madhra,jaideepmadhraspl@gmail.com,-,,Not found in payment gateways,,,,2026-05-10T13:37:30Z,2026-05-10T15:32:19Z,16m,5.61,not matched,
-Roshan Biswakarma,roshanbiswakarma23456@gmail.com,-,,Not found in payment gateways,,,,2026-05-10T13:32:56Z,2026-05-10T13:53:10Z,15m,5.32,not matched,
-Shivani Sancheti,shivujain9503@gmail.com,-,,Not found in payment gateways,,,,2026-05-10T14:28:37Z,2026-05-10T14:40:00Z,11m,3.9,not matched,
-Jyoti Chaurasiya,jyotihac5544@gmail.com,-,,Not found in payment gateways,,,,2026-05-10T13:32:38Z,2026-05-10T13:42:47Z,10m,3.48,not matched,
-Chirag S,chiragsetia.ece16@jecrc.ac.in,-,,Not found in payment gateways,,,,2026-05-10T13:17:07Z,2026-05-10T13:38:28Z,4m,1.7,not matched,
-Debasis Panda,debasis.panda1985@gmail.com,-,,Not found in payment gateways,,,,2026-05-10T13:31:09Z,2026-05-10T13:35:46Z,4m,1.58,not matched,
-Parul Na,parul.maha96@gmail.com,-,,Not found in payment gateways,,,,2026-05-10T13:31:59Z,2026-05-10T13:36:02Z,4m,1.39,not matched,
-Nidhi Sharma,nidhisharma76076@gmail.com,-,,Not found in payment gateways,,,,2026-05-10T14:22:24Z,2026-05-10T14:22:38Z,0m,0.08,not matched,
+Name,Email,Phone,Registration Date,Registration Type,Join Time,Final Drop Time,Total Present,Attendance %
+Mr Rahul,uk07rahul1196@gmail.com,-,,Not found in payment gateways,2026-05-10T13:11:06Z,2026-05-10T17:50:07Z,4h 39m,95.7
+Aditya Parashar,parasharaditya795@gmail.com,-,,Not found in payment gateways,2026-05-10T13:28:34Z,2026-05-10T17:50:07Z,4h 21m,89.71
+Aman Srivastava,amansrivastava1211@gmail.com,-,,Not found in payment gateways,2026-05-10T13:43:48Z,2026-05-10T17:05:05Z,3h 21m,69.04
+sunil darro,sunilkumardarr@gmail.com,-,,Not found in payment gateways,2026-05-10T13:38:47Z,2026-05-10T16:56:22Z,2h 50m,58.55
+Sarvar Naveed,trulymaster@gmail.com,-,,Not found in payment gateways,2026-05-10T13:42:21Z,2026-05-10T16:31:11Z,2h 48m,57.91
+Ravinderjit Kaur,kravinderjit785@gmail.com,-,,Not found in payment gateways,2026-05-10T13:36:35Z,2026-05-10T15:44:09Z,2h 7m,43.75
+Neha Deshmukh,nehasdeshmukh12@outlook.com,-,,Not found in payment gateways,2026-05-10T13:40:00Z,2026-05-10T15:10:20Z,1h 30m,30.98
+Mohd moid Afsar,moidafsar04@gmail.com,-,,Not found in payment gateways,2026-05-10T15:46:36Z,2026-05-10T16:36:57Z,41m,14.38
+Omraj Raj,kunalkumar23august@gmail.com,-,,Not found in payment gateways,2026-05-10T13:35:08Z,2026-05-10T13:59:58Z,24m,8.51
+Noor Mohammad,noormohd139802@gmail.com,-,,Not found in payment gateways,2026-05-10T14:01:27Z,2026-05-10T14:17:56Z,16m,5.65
+Jaideep Madhra,jaideepmadhraspl@gmail.com,-,,Not found in payment gateways,2026-05-10T13:37:30Z,2026-05-10T15:32:19Z,16m,5.61
+Roshan Biswakarma,roshanbiswakarma23456@gmail.com,-,,Not found in payment gateways,2026-05-10T13:32:56Z,2026-05-10T13:53:10Z,15m,5.32
+Shivani Sancheti,shivujain9503@gmail.com,-,,Not found in payment gateways,2026-05-10T14:28:37Z,2026-05-10T14:40:00Z,11m,3.9
+Jyoti Chaurasiya,jyotihac5544@gmail.com,-,,Not found in payment gateways,2026-05-10T13:32:38Z,2026-05-10T13:42:47Z,10m,3.48
+Chirag S,chiragsetia.ece16@jecrc.ac.in,-,,Not found in payment gateways,2026-05-10T13:17:07Z,2026-05-10T13:38:28Z,4m,1.7
+Debasis Panda,debasis.panda1985@gmail.com,-,,Not found in payment gateways,2026-05-10T13:31:09Z,2026-05-10T13:35:46Z,4m,1.58
+Parul Na,parul.maha96@gmail.com,-,,Not found in payment gateways,2026-05-10T13:31:59Z,2026-05-10T13:36:02Z,4m,1.39
+Nidhi Sharma,nidhisharma76076@gmail.com,-,,Not found in payment gateways,2026-05-10T14:22:24Z,2026-05-10T14:22:38Z,0m,0.08

@@ -1,12 +1,12 @@
-Name,Email,Phone,Registration Date,Registration Type,Gateway,Payment ID,Amount,Join Time,Final Drop Time,Total Present,Attendance %,Match Method,Purpose
-CHANDAN KUMAR DAS,chndn52.kumar@gmail.com,9599243249,,Not found in payment gateways,,,,2026-05-31T13:02:23Z,2026-05-31T17:23:55Z,3h 53m,100,not matched,
-Nidhi Diwakar,nidhidiwakar103@gmail.com,8839312523,,Not found in payment gateways,,,,2026-05-31T14:15:25Z,2026-05-31T17:23:55Z,3h 8m,80.68,not matched,
-ANSHUMAN RAI,anshumanrai025@gmail.com,08700751222,,Not found in payment gateways,,,,2026-05-31T13:31:25Z,2026-05-31T15:37:36Z,2h 6m,54.01,not matched,
-Anushka Bhardwaj,bhardwajanushka1905@gmail.com,9310505425,,Not found in payment gateways,,,,2026-05-31T13:42:51Z,2026-05-31T15:29:36Z,1h 46m,45.69,not matched,
-Abhijeet Sonone,abhideva2105@gmail.com,9209729938,,Not found in payment gateways,,,,2026-05-31T13:42:08Z,2026-05-31T15:29:41Z,1h 46m,45.55,not matched,
-VISHAL MAGOTRA,vishal_magotra@yahoo.com,88003343441,,Not found in payment gateways,,,,2026-05-31T14:20:55Z,2026-05-31T15:19:54Z,58m,25.25,not matched,
-Aditya Kumar,kumaraditya6209911625@gmail.com,6209911625,,Not found in payment gateways,,,,2026-05-31T14:02:35Z,2026-05-31T14:29:02Z,26m,11.32,not matched,
-Gajare Anamika,anugajare786@gmail.com,09316522995,,Not found in payment gateways,,,,2026-05-31T13:38:04Z,2026-05-31T14:02:04Z,24m,10.27,not matched,
-Ruchi Shukla,shuklaruchi974@gmail.com,9891203479,,Not found in payment gateways,,,,2026-05-31T14:01:26Z,2026-05-31T14:24:21Z,22m,9.81,not matched,
-Anuj Yadav,anujydv9173@gmail.com,8619007574,,Not found in payment gateways,,,,2026-05-31T15:14:54Z,2026-05-31T15:26:12Z,9m,4.27,not matched,
-Anson John,ansonjohn221984@gmail.com,09653667009,,Not found in payment gateways,,,,2026-05-31T13:50:40Z,2026-05-31T13:56:28Z,5m,2.48,not matched,
+Name,Email,Phone,Registration Date,Registration Type,Join Time,Final Drop Time,Total Present,Attendance %
+CHANDAN KUMAR DAS,chndn52.kumar@gmail.com,9599243249,,Not found in payment gateways,2026-05-31T13:02:23Z,2026-05-31T17:23:55Z,3h 53m,100
+Nidhi Diwakar,nidhidiwakar103@gmail.com,8839312523,,Not found in payment gateways,2026-05-31T14:15:25Z,2026-05-31T17:23:55Z,3h 8m,80.68
+ANSHUMAN RAI,anshumanrai025@gmail.com,08700751222,,Not found in payment gateways,2026-05-31T13:31:25Z,2026-05-31T15:37:36Z,2h 6m,54.01
+Anushka Bhardwaj,bhardwajanushka1905@gmail.com,9310505425,,Not found in payment gateways,2026-05-31T13:42:51Z,2026-05-31T15:29:36Z,1h 46m,45.69
+Abhijeet Sonone,abhideva2105@gmail.com,9209729938,,Not found in payment gateways,2026-05-31T13:42:08Z,2026-05-31T15:29:41Z,1h 46m,45.55
+VISHAL MAGOTRA,vishal_magotra@yahoo.com,88003343441,,Not found in payment gateways,2026-05-31T14:20:55Z,2026-05-31T15:19:54Z,58m,25.25
+Aditya Kumar,kumaraditya6209911625@gmail.com,6209911625,,Not found in payment gateways,2026-05-31T14:02:35Z,2026-05-31T14:29:02Z,26m,11.32
+Gajare Anamika,anugajare786@gmail.com,09316522995,,Not found in payment gateways,2026-05-31T13:38:04Z,2026-05-31T14:02:04Z,24m,10.27
+Ruchi Shukla,shuklaruchi974@gmail.com,9891203479,,Not found in payment gateways,2026-05-31T14:01:26Z,2026-05-31T14:24:21Z,22m,9.81
+Anuj Yadav,anujydv9173@gmail.com,8619007574,,Not found in payment gateways,2026-05-31T15:14:54Z,2026-05-31T15:26:12Z,9m,4.27
+Anson John,ansonjohn221984@gmail.com,09653667009,,Not found in payment gateways,2026-05-31T13:50:40Z,2026-05-31T13:56:28Z,5m,2.48

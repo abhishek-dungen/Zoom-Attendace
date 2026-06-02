@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Zoom Webinar Analysis</title>
-    <link rel="stylesheet" href="styles.css?v=20260602-01" />
+    <link rel="stylesheet" href="styles.css?v=20260602-02" />
   </head>
   <body>
     <main class="page">
@@ -83,44 +83,12 @@
         </div>
         <div class="kpi-grid" id="paymentKpis"></div>
 
-        <article class="report-block">
+        <article class="report-block" id="paymentReportBlock">
           <div class="section-head section-head-row">
-            <h3>Registered this week and attended</h3>
-            <a id="sameWeekAttendedCsvLink" class="button small" href="#">Download CSV</a>
+            <h3 id="paymentReportTitle">Registered this week</h3>
+            <a id="paymentReportCsvLink" class="button small" href="#">Download CSV</a>
           </div>
-          <div class="table-wrap" id="sameWeekAttendedTable"></div>
-        </article>
-
-        <article class="report-block">
-          <div class="section-head section-head-row">
-            <h3>Registered in previous weeks and attended this webinar</h3>
-            <a id="priorWeekAttendedCsvLink" class="button small" href="#">Download CSV</a>
-          </div>
-          <div class="table-wrap" id="priorWeekAttendedTable"></div>
-        </article>
-
-        <article class="report-block">
-          <div class="section-head section-head-row">
-            <h3>Attended but not found in payment gateways</h3>
-            <a id="outsideRegistrationCsvLink" class="button small" href="#">Download CSV</a>
-          </div>
-          <div class="table-wrap" id="outsideRegistrationTable"></div>
-        </article>
-
-        <article class="report-block">
-          <div class="section-head section-head-row">
-            <h3>Registered this week but did not attend</h3>
-            <a id="registeredNotAttendedCsvLink" class="button small" href="#">Download CSV</a>
-          </div>
-          <div class="table-wrap" id="registeredNotAttendedTable"></div>
-        </article>
-
-        <article class="report-block">
-          <div class="section-head section-head-row">
-            <h3>Participant chat report</h3>
-            <a id="participantChatCsvLink" class="button small" href="#">Download CSV</a>
-          </div>
-          <div class="table-wrap" id="participantChatTable"></div>
+          <div class="table-wrap" id="paymentReportTable"></div>
         </article>
       </section>
 
@@ -188,6 +156,6 @@
       </section>
     </main>
 
-    <script type="module" src="app.js?v=20260602-01"></script>
+    <script type="module" src="app.js?v=20260602-02"></script>
   </body>
 </html>

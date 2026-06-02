@@ -16,16 +16,9 @@ const afterCourseTableEl = document.getElementById("afterCourseTable");
 const stayedTillEndTableEl = document.getElementById("stayedTillEndTable");
 const paymentMethodologyEl = document.getElementById("paymentMethodology");
 const paymentKpisEl = document.getElementById("paymentKpis");
-const sameWeekAttendedTableEl = document.getElementById("sameWeekAttendedTable");
-const priorWeekAttendedTableEl = document.getElementById("priorWeekAttendedTable");
-const outsideRegistrationTableEl = document.getElementById("outsideRegistrationTable");
-const registeredNotAttendedTableEl = document.getElementById("registeredNotAttendedTable");
-const participantChatTableEl = document.getElementById("participantChatTable");
-const sameWeekAttendedCsvLinkEl = document.getElementById("sameWeekAttendedCsvLink");
-const priorWeekAttendedCsvLinkEl = document.getElementById("priorWeekAttendedCsvLink");
-const outsideRegistrationCsvLinkEl = document.getElementById("outsideRegistrationCsvLink");
-const registeredNotAttendedCsvLinkEl = document.getElementById("registeredNotAttendedCsvLink");
-const participantChatCsvLinkEl = document.getElementById("participantChatCsvLink");
+const paymentReportTitleEl = document.getElementById("paymentReportTitle");
+const paymentReportTableEl = document.getElementById("paymentReportTable");
+const paymentReportCsvLinkEl = document.getElementById("paymentReportCsvLink");
 const conversionMethodologyEl = document.getElementById("conversionMethodology");
 const conversionKpisEl = document.getElementById("conversionKpis");
 const conversionTableEl = document.getElementById("conversionTable");
@@ -58,6 +51,7 @@ let webinarManifest = [];
 let aggregatePayload = null;
 let paymentAttendancePayload = null;
 let currentPayload = null;
+let activePaymentReportKey = "sameWeekRegistrations";
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -101,6 +95,17 @@ function formatDateOnlyIst(value) {
     month: "long",
     year: "numeric",
   }).format(date);
+}
+
+function formatRegistrationType(value) {
+  const text = String(value || "").toLowerCase();
+  if (text.includes("combo") || text.includes("bundle")) {
+    return "Combo";
+  }
+  if (text.includes("webinar")) {
+    return "Webinar";
+  }
+  return value || "-";
 }
 
 function formatTimeOnlyIst(value) {
@@ -209,16 +214,12 @@ function paymentRows(rows) {
     escapeHtml(row.name || "-"),
     escapeHtml(row.email || "-"),
     escapeHtml(row.phone || "-"),
-    escapeHtml(formatDateTimeIst(row.registrationDate)),
-    escapeHtml(row.registrationType || "-"),
-    escapeHtml(row.gateway || "-"),
-    escapeHtml(row.paymentId || "-"),
-    escapeHtml(row.amount === "" ? "-" : formatCurrency(row.amount)),
+    escapeHtml(formatDateOnlyIst(row.registrationDate)),
+    escapeHtml(formatRegistrationType(row.registrationType)),
     escapeHtml(formatTimeOnlyIst(row.joinTime)),
     escapeHtml(formatTimeOnlyIst(row.finalDropTime)),
     escapeHtml(row.totalPresent || "-"),
     escapeHtml(formatPercent(row.attendancePercent)),
-    escapeHtml(row.matchMethod || "-"),
   ]);
 }
 
@@ -233,14 +234,14 @@ function chatRows(rows) {
   ]);
 }
 
-function buildKpis(items) {
+function buildKpis(items, activeKey = "") {
   return items
     .map(
       (item) => `
-        <div class="kpi-card">
+        <button class="kpi-card ${item.key === activeKey ? "is-active" : ""}" type="button" data-payment-report="${escapeHtml(item.key || "")}">
           <span>${escapeHtml(item.label)}</span>
           <strong>${escapeHtml(item.value)}</strong>
-        </div>
+        </button>
       `
     )
     .join("");
@@ -282,46 +283,92 @@ function renderPaymentAttendance() {
   const method = paymentAttendancePayload.methodology || {};
   const matchOrder = String(method.attendeeMatchOrder || "email, phone, name").replace(/\.$/, "");
   paymentMethodologyEl.textContent = `${report.weekLabel}. Match order: ${matchOrder}. Attendance time uses actual Zoom join segments.`;
-  paymentKpisEl.innerHTML = buildKpis([
-    { label: "Registrations this week", value: report.summary.sameWeekRegistrations },
-    { label: "Registered this week and attended", value: report.summary.sameWeekRegisteredAttended },
-    { label: "Attendance rate", value: formatPercent(report.summary.sameWeekAttendancePercent) },
-    { label: "Previous-week registrants attended", value: report.summary.priorWeekRegisteredAttended },
-    { label: "Attended without payment match", value: report.summary.outsideRegistrationAttended },
-    { label: "Registered but not attended", value: report.summary.registeredNotAttended },
-    { label: "Participant chats captured", value: report.summary.participantChats },
-  ]);
+  const paymentReports = {
+    sameWeekRegistrations: {
+      title: "Registrations this week",
+      value: report.summary.sameWeekRegistrations,
+      rows: report.sameWeekRegistrations || [],
+      csvPath: report.csvPaths?.sameWeekRegistrations,
+      empty: "No registrations found for this week.",
+      type: "payment",
+    },
+    sameWeekRegisteredAttended: {
+      title: "Registered this week and attended",
+      value: report.summary.sameWeekRegisteredAttended,
+      rows: report.sameWeekRegisteredAttended || [],
+      csvPath: report.csvPaths?.sameWeekAttended,
+      empty: "No same-week registrants attended this webinar.",
+      type: "payment",
+    },
+    sameWeekAttendancePercent: {
+      title: "Attendance rate",
+      value: formatPercent(report.summary.sameWeekAttendancePercent),
+      rows: report.sameWeekRegisteredAttended || [],
+      csvPath: report.csvPaths?.sameWeekAttended,
+      empty: "No same-week registrants attended this webinar.",
+      type: "payment",
+    },
+    priorWeekRegisteredAttended: {
+      title: "Previous-week registrants attended",
+      value: report.summary.priorWeekRegisteredAttended,
+      rows: report.priorWeekRegisteredAttended || [],
+      csvPath: report.csvPaths?.priorWeekAttended,
+      empty: "No prior-week registrants attended this webinar.",
+      type: "payment",
+    },
+    outsideRegistrationAttended: {
+      title: "Attended without payment match",
+      value: report.summary.outsideRegistrationAttended,
+      rows: report.outsideRegistrationAttended || [],
+      csvPath: report.csvPaths?.outsideRegistration,
+      empty: "No attendees were outside the payment gateway records.",
+      type: "payment",
+    },
+    registeredNotAttended: {
+      title: "Registered but not attended",
+      value: report.summary.registeredNotAttended,
+      rows: report.registeredNotAttended || [],
+      csvPath: report.csvPaths?.registeredNotAttended,
+      empty: "Every same-week registrant attended at least once.",
+      type: "payment",
+    },
+    participantChats: {
+      title: "Participant chats captured",
+      value: report.summary.participantChats,
+      rows: report.participantChats || [],
+      csvPath: report.csvPaths?.chat,
+      empty: "No participant chats were captured for this webinar.",
+      type: "chat",
+    },
+  };
 
-  const headers = [
+  if (!paymentReports[activePaymentReportKey]) {
+    activePaymentReportKey = "sameWeekRegistrations";
+  }
+
+  paymentKpisEl.innerHTML = buildKpis(
+    Object.entries(paymentReports).map(([key, item]) => ({ key, label: item.title, value: item.value })),
+    activePaymentReportKey
+  );
+
+  const paymentHeaders = [
     "Name",
     "Email",
     "Phone",
     "Registration Date",
     "Registration Type",
-    "Gateway",
-    "Payment ID",
-    "Amount",
     "Join Time",
     "Final Drop",
     "Total Present",
     "Attendance %",
-    "Match",
   ];
-  sameWeekAttendedTableEl.innerHTML = buildTable(headers, paymentRows(report.sameWeekRegisteredAttended || []), "No same-week registrants attended this webinar.");
-  priorWeekAttendedTableEl.innerHTML = buildTable(headers, paymentRows(report.priorWeekRegisteredAttended || []), "No prior-week registrants attended this webinar.");
-  outsideRegistrationTableEl.innerHTML = buildTable(headers, paymentRows(report.outsideRegistrationAttended || []), "No attendees were outside the payment gateway records.");
-  registeredNotAttendedTableEl.innerHTML = buildTable(headers, paymentRows(report.registeredNotAttended || []), "Every same-week registrant attended at least once.");
-  participantChatTableEl.innerHTML = buildTable(
-    ["Name", "Email", "Phone", "Chat Time", "Offset", "Message"],
-    chatRows(report.participantChats || []),
-    "No participant chats were captured for this webinar."
-  );
-
-  sameWeekAttendedCsvLinkEl.href = report.csvPaths?.sameWeekAttended || "#";
-  priorWeekAttendedCsvLinkEl.href = report.csvPaths?.priorWeekAttended || "#";
-  outsideRegistrationCsvLinkEl.href = report.csvPaths?.outsideRegistration || "#";
-  registeredNotAttendedCsvLinkEl.href = report.csvPaths?.registeredNotAttended || "#";
-  participantChatCsvLinkEl.href = report.csvPaths?.chat || "#";
+  const selected = paymentReports[activePaymentReportKey];
+  paymentReportTitleEl.textContent = selected.title;
+  paymentReportCsvLinkEl.href = selected.csvPath || "#";
+  paymentReportTableEl.innerHTML =
+    selected.type === "chat"
+      ? buildTable(["Name", "Email", "Phone", "Chat Time", "Offset", "Message"], chatRows(selected.rows), selected.empty)
+      : buildTable(paymentHeaders, paymentRows(selected.rows), selected.empty);
 }
 
 function renderConversion() {
@@ -335,9 +382,8 @@ function renderConversion() {
   const breakdown = conversion.byRegistrationType || {};
   conversionKpisEl.innerHTML = buildKpis([
     { label: "Course purchases", value: conversion.coursePurchases || 0 },
-    { label: "From webinar only", value: breakdown["Webinar only"] || 0 },
-    { label: "From combo", value: breakdown["Combo: webinar + bundle"] || 0 },
-    { label: "From bundle only", value: breakdown["Bundle only"] || 0 },
+    { label: "From webinar", value: breakdown.Webinar || 0 },
+    { label: "From combo", value: breakdown.Combo || 0 },
     { label: "No prior registration found", value: breakdown["No prior webinar/bundle registration found"] || 0 },
   ]);
 
@@ -345,8 +391,8 @@ function renderConversion() {
     escapeHtml(buyer.name || "-"),
     escapeHtml(buyer.email || "-"),
     escapeHtml(buyer.phone || "-"),
-    escapeHtml(buyer.registrationType || "-"),
-    escapeHtml(formatDateTimeIst(buyer.registrationDate)),
+    escapeHtml(formatRegistrationType(buyer.registrationType)),
+    escapeHtml(formatDateOnlyIst(buyer.registrationDate)),
     escapeHtml(formatDateTimeIst(buyer.coursePurchaseDate)),
     escapeHtml(buyer.gateway || "-"),
     escapeHtml(buyer.paymentId || "-"),
@@ -631,6 +677,15 @@ function attachInteractions() {
       setActiveView(button.dataset.view);
     });
   }
+
+  paymentKpisEl.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-payment-report]");
+    if (!button) {
+      return;
+    }
+    activePaymentReportKey = button.dataset.paymentReport;
+    renderPaymentAttendance();
+  });
 }
 
 async function init() {

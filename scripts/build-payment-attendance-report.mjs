@@ -82,15 +82,10 @@ function writeCsv(filePath, rows) {
     "Phone",
     "Registration Date",
     "Registration Type",
-    "Gateway",
-    "Payment ID",
-    "Amount",
     "Join Time",
     "Final Drop Time",
     "Total Present",
     "Attendance %",
-    "Match Method",
-    "Purpose",
   ];
   const csvRows = [headers.join(",")];
   for (const row of rows) {
@@ -146,6 +141,12 @@ function isoIstDate(date) {
   return `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
 }
 
+function formatCsvDate(value) {
+  const date = parseDate(value);
+  if (!date) return "";
+  return isoIstDate(date);
+}
+
 function normalizeEmail(value) {
   return clean(value).toLowerCase();
 }
@@ -188,9 +189,9 @@ function classify(amount, purpose) {
 
 function labelClassification(value) {
   return {
-    webinar_only: "Webinar only",
-    combo: "Combo: webinar + bundle",
-    bundle_only: "Bundle only",
+    webinar_only: "Webinar",
+    combo: "Combo",
+    bundle_only: "Combo",
     course: "Course",
     other: "Other",
   }[value] || "Other";
@@ -388,17 +389,12 @@ function csvRowFromReport(row) {
     "Name": row.name,
     "Email": row.email,
     "Phone": row.phone,
-    "Registration Date": row.registrationDate,
+    "Registration Date": formatCsvDate(row.registrationDate),
     "Registration Type": row.registrationType,
-    "Gateway": row.gateway,
-    "Payment ID": row.paymentId,
-    "Amount": row.amount,
     "Join Time": row.joinTime,
     "Final Drop Time": row.finalDropTime,
     "Total Present": row.totalPresent,
     "Attendance %": row.attendancePercent,
-    "Match Method": row.matchMethod,
-    "Purpose": row.purpose,
   };
 }
 
@@ -561,8 +557,14 @@ function main() {
     const sameWeekAttendedUnique = dedupeReportRows(sameWeekAttended);
     const priorWeekAttendedUnique = dedupeReportRows(priorWeekAttended);
     const outsideRegistrationUnique = dedupeReportRows(outsideRegistration);
+    const sameWeekRegistrations = [...sameWeekAttendedUnique, ...registeredNotAttended].sort((a, b) => {
+      const left = new Date(a.registrationDate).getTime() || 0;
+      const right = new Date(b.registrationDate).getTime() || 0;
+      return left - right;
+    });
     const chatRows = buildChatRows(participants);
     const csvPaths = {
+      sameWeekRegistrations: `data/payment-weekly/${baseName}-same-week-registrations.csv`,
       sameWeekAttended: `data/payment-weekly/${baseName}-same-week-registered-attended.csv`,
       priorWeekAttended: `data/payment-weekly/${baseName}-prior-week-registered-attended.csv`,
       outsideRegistration: `data/payment-weekly/${baseName}-outside-registration.csv`,
@@ -570,6 +572,7 @@ function main() {
       chat: `data/payment-weekly/${baseName}-participant-chat.csv`,
     };
 
+    writeCsv(path.join(repo, "site", csvPaths.sameWeekRegistrations), sameWeekRegistrations.map(csvRowFromReport));
     writeCsv(path.join(repo, "site", csvPaths.sameWeekAttended), sameWeekAttendedUnique.map(csvRowFromReport));
     writeCsv(path.join(repo, "site", csvPaths.priorWeekAttended), priorWeekAttendedUnique.map(csvRowFromReport));
     writeCsv(path.join(repo, "site", csvPaths.outsideRegistration), outsideRegistrationUnique.map(csvRowFromReport));
@@ -600,6 +603,7 @@ function main() {
         registeredNotAttended: summarizeCounts(registeredNotAttended),
       },
       csvPaths,
+      sameWeekRegistrations,
       sameWeekRegisteredAttended: sameWeekAttendedUnique,
       priorWeekRegisteredAttended: priorWeekAttendedUnique,
       outsideRegistrationAttended: outsideRegistrationUnique,

@@ -7,6 +7,8 @@
   "scripts": {
     "fetch:attendance": "node scripts/fetch-attendance.mjs",
     "sync:reports": "node scripts/sync-reports.mjs",
+    "sync:payment-attendance": "node scripts/build-payment-attendance-report.mjs",
+    "sync:live": "node scripts/sync-live-every-second.mjs",
     "backup:firebase": "node scripts/backup-to-firebase.mjs"
   },
   "dependencies": {

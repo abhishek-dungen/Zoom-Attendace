@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Zoom Webinar Analysis</title>
-    <link rel="stylesheet" href="styles.css?v=20260529-14" />
+    <link rel="stylesheet" href="styles.css?v=20260602-01" />
   </head>
   <body>
     <main class="page">
@@ -37,6 +37,8 @@
           <button class="tile-button" data-view="beforeCourseView" type="button">Dropped before course</button>
           <button class="tile-button" data-view="afterCourseView" type="button">Dropped in next 30 min</button>
           <button class="tile-button" data-view="stayedTillEndView" type="button">Stayed till end</button>
+          <button class="tile-button" data-view="paymentAttendanceView" type="button">Payment + attendance</button>
+          <button class="tile-button" data-view="conversionView" type="button">Course conversion</button>
           <button class="tile-button" data-view="fifteenMinuteView" type="button">15-minute analysis</button>
           <button class="tile-button" data-view="consolidatedView" type="button">Consolidated report</button>
         </div>
@@ -72,6 +74,63 @@
           <a id="stayedTillEndCsvLink" class="button small" href="#">Download CSV</a>
         </div>
         <div class="table-wrap" id="stayedTillEndTable"></div>
+      </section>
+
+      <section class="panel table-panel report-view" id="paymentAttendanceView">
+        <div class="section-head">
+          <h2>Weekly Payment + Attendance</h2>
+          <p class="chart-note" id="paymentMethodology">Loading payment matching report...</p>
+        </div>
+        <div class="kpi-grid" id="paymentKpis"></div>
+
+        <article class="report-block">
+          <div class="section-head section-head-row">
+            <h3>Registered this week and attended</h3>
+            <a id="sameWeekAttendedCsvLink" class="button small" href="#">Download CSV</a>
+          </div>
+          <div class="table-wrap" id="sameWeekAttendedTable"></div>
+        </article>
+
+        <article class="report-block">
+          <div class="section-head section-head-row">
+            <h3>Registered in previous weeks and attended this webinar</h3>
+            <a id="priorWeekAttendedCsvLink" class="button small" href="#">Download CSV</a>
+          </div>
+          <div class="table-wrap" id="priorWeekAttendedTable"></div>
+        </article>
+
+        <article class="report-block">
+          <div class="section-head section-head-row">
+            <h3>Attended but not found in payment gateways</h3>
+            <a id="outsideRegistrationCsvLink" class="button small" href="#">Download CSV</a>
+          </div>
+          <div class="table-wrap" id="outsideRegistrationTable"></div>
+        </article>
+
+        <article class="report-block">
+          <div class="section-head section-head-row">
+            <h3>Registered this week but did not attend</h3>
+            <a id="registeredNotAttendedCsvLink" class="button small" href="#">Download CSV</a>
+          </div>
+          <div class="table-wrap" id="registeredNotAttendedTable"></div>
+        </article>
+
+        <article class="report-block">
+          <div class="section-head section-head-row">
+            <h3>Participant chat report</h3>
+            <a id="participantChatCsvLink" class="button small" href="#">Download CSV</a>
+          </div>
+          <div class="table-wrap" id="participantChatTable"></div>
+        </article>
+      </section>
+
+      <section class="panel table-panel report-view" id="conversionView">
+        <div class="section-head">
+          <h2>Course Conversion By Registration Type</h2>
+          <p class="chart-note" id="conversionMethodology">Loading conversion report...</p>
+        </div>
+        <div class="kpi-grid" id="conversionKpis"></div>
+        <div class="table-wrap" id="conversionTable"></div>
       </section>
 
       <section class="panel table-panel report-view" id="fifteenMinuteView">
@@ -129,6 +188,6 @@
       </section>
     </main>
 
-    <script type="module" src="app.js?v=20260529-14"></script>
+    <script type="module" src="app.js?v=20260602-01"></script>
   </body>
 </html>

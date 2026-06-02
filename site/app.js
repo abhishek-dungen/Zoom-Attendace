@@ -14,6 +14,21 @@ const uniqueParticipantsTableEl = document.getElementById("uniqueParticipantsTab
 const beforeCourseTableEl = document.getElementById("beforeCourseTable");
 const afterCourseTableEl = document.getElementById("afterCourseTable");
 const stayedTillEndTableEl = document.getElementById("stayedTillEndTable");
+const paymentMethodologyEl = document.getElementById("paymentMethodology");
+const paymentKpisEl = document.getElementById("paymentKpis");
+const sameWeekAttendedTableEl = document.getElementById("sameWeekAttendedTable");
+const priorWeekAttendedTableEl = document.getElementById("priorWeekAttendedTable");
+const outsideRegistrationTableEl = document.getElementById("outsideRegistrationTable");
+const registeredNotAttendedTableEl = document.getElementById("registeredNotAttendedTable");
+const participantChatTableEl = document.getElementById("participantChatTable");
+const sameWeekAttendedCsvLinkEl = document.getElementById("sameWeekAttendedCsvLink");
+const priorWeekAttendedCsvLinkEl = document.getElementById("priorWeekAttendedCsvLink");
+const outsideRegistrationCsvLinkEl = document.getElementById("outsideRegistrationCsvLink");
+const registeredNotAttendedCsvLinkEl = document.getElementById("registeredNotAttendedCsvLink");
+const participantChatCsvLinkEl = document.getElementById("participantChatCsvLink");
+const conversionMethodologyEl = document.getElementById("conversionMethodology");
+const conversionKpisEl = document.getElementById("conversionKpis");
+const conversionTableEl = document.getElementById("conversionTable");
 const uniqueCsvLinkEl = document.getElementById("uniqueCsvLink");
 const beforeCourseCsvLinkEl = document.getElementById("beforeCourseCsvLink");
 const afterCourseCsvLinkEl = document.getElementById("afterCourseCsvLink");
@@ -41,6 +56,7 @@ const reportViews = [...document.querySelectorAll(".report-view")];
 
 let webinarManifest = [];
 let aggregatePayload = null;
+let paymentAttendancePayload = null;
 let currentPayload = null;
 
 function escapeHtml(value) {
@@ -136,6 +152,12 @@ function formatPercent(value) {
   return `${Number(value || 0).toFixed(2)}%`;
 }
 
+function formatCurrency(value) {
+  return new Intl.NumberFormat("en-IN", {
+    maximumFractionDigits: 2,
+  }).format(Number(value || 0));
+}
+
 function formatAverageNumber(value) {
   return Number(value || 0).toFixed(2);
 }
@@ -182,6 +204,48 @@ function participantRows(participants) {
   ]);
 }
 
+function paymentRows(rows) {
+  return rows.map((row) => [
+    escapeHtml(row.name || "-"),
+    escapeHtml(row.email || "-"),
+    escapeHtml(row.phone || "-"),
+    escapeHtml(formatDateTimeIst(row.registrationDate)),
+    escapeHtml(row.registrationType || "-"),
+    escapeHtml(row.gateway || "-"),
+    escapeHtml(row.paymentId || "-"),
+    escapeHtml(row.amount === "" ? "-" : formatCurrency(row.amount)),
+    escapeHtml(formatTimeOnlyIst(row.joinTime)),
+    escapeHtml(formatTimeOnlyIst(row.finalDropTime)),
+    escapeHtml(row.totalPresent || "-"),
+    escapeHtml(formatPercent(row.attendancePercent)),
+    escapeHtml(row.matchMethod || "-"),
+  ]);
+}
+
+function chatRows(rows) {
+  return rows.map((row) => [
+    escapeHtml(row.name || "-"),
+    escapeHtml(row.email || "-"),
+    escapeHtml(row.phone || "-"),
+    escapeHtml(formatDateTimeIst(row.time)),
+    escapeHtml(row.offsetTime || "-"),
+    `<div class="chat-message">${escapeHtml(row.message || "-").replaceAll("\n", "<br>")}</div>`,
+  ]);
+}
+
+function buildKpis(items) {
+  return items
+    .map(
+      (item) => `
+        <div class="kpi-card">
+          <span>${escapeHtml(item.label)}</span>
+          <strong>${escapeHtml(item.value)}</strong>
+        </div>
+      `
+    )
+    .join("");
+}
+
 function renderTables(payload) {
   const headers = [
     "Name",
@@ -197,6 +261,102 @@ function renderTables(payload) {
   beforeCourseTableEl.innerHTML = buildTable(headers, participantRows(payload.cohorts?.droppedBeforeCourse || []), "Nobody dropped before the course reveal cutoff.");
   afterCourseTableEl.innerHTML = buildTable(headers, participantRows(payload.cohorts?.droppedDuringPitchWindow || []), "Nobody dropped in the 30-minute window after course reveal.");
   stayedTillEndTableEl.innerHTML = buildTable(headers, participantRows(payload.cohorts?.stayedTillEnd || []), "No participants matched the stayed-till-end rule.");
+}
+
+function currentPaymentReport() {
+  if (!paymentAttendancePayload || !currentReportPath) {
+    return null;
+  }
+  return (paymentAttendancePayload.reports || []).find((report) => report.reportJson === currentReportPath) || null;
+}
+
+function renderPaymentAttendance() {
+  const report = currentPaymentReport();
+  if (!report) {
+    if (paymentMethodologyEl) {
+      paymentMethodologyEl.textContent = "No payment-attendance report has been generated for this webinar yet.";
+    }
+    return;
+  }
+
+  const method = paymentAttendancePayload.methodology || {};
+  const matchOrder = String(method.attendeeMatchOrder || "email, phone, name").replace(/\.$/, "");
+  paymentMethodologyEl.textContent = `${report.weekLabel}. Match order: ${matchOrder}. Attendance time uses actual Zoom join segments.`;
+  paymentKpisEl.innerHTML = buildKpis([
+    { label: "Registrations this week", value: report.summary.sameWeekRegistrations },
+    { label: "Registered this week and attended", value: report.summary.sameWeekRegisteredAttended },
+    { label: "Attendance rate", value: formatPercent(report.summary.sameWeekAttendancePercent) },
+    { label: "Previous-week registrants attended", value: report.summary.priorWeekRegisteredAttended },
+    { label: "Attended without payment match", value: report.summary.outsideRegistrationAttended },
+    { label: "Registered but not attended", value: report.summary.registeredNotAttended },
+    { label: "Participant chats captured", value: report.summary.participantChats },
+  ]);
+
+  const headers = [
+    "Name",
+    "Email",
+    "Phone",
+    "Registration Date",
+    "Registration Type",
+    "Gateway",
+    "Payment ID",
+    "Amount",
+    "Join Time",
+    "Final Drop",
+    "Total Present",
+    "Attendance %",
+    "Match",
+  ];
+  sameWeekAttendedTableEl.innerHTML = buildTable(headers, paymentRows(report.sameWeekRegisteredAttended || []), "No same-week registrants attended this webinar.");
+  priorWeekAttendedTableEl.innerHTML = buildTable(headers, paymentRows(report.priorWeekRegisteredAttended || []), "No prior-week registrants attended this webinar.");
+  outsideRegistrationTableEl.innerHTML = buildTable(headers, paymentRows(report.outsideRegistrationAttended || []), "No attendees were outside the payment gateway records.");
+  registeredNotAttendedTableEl.innerHTML = buildTable(headers, paymentRows(report.registeredNotAttended || []), "Every same-week registrant attended at least once.");
+  participantChatTableEl.innerHTML = buildTable(
+    ["Name", "Email", "Phone", "Chat Time", "Offset", "Message"],
+    chatRows(report.participantChats || []),
+    "No participant chats were captured for this webinar."
+  );
+
+  sameWeekAttendedCsvLinkEl.href = report.csvPaths?.sameWeekAttended || "#";
+  priorWeekAttendedCsvLinkEl.href = report.csvPaths?.priorWeekAttended || "#";
+  outsideRegistrationCsvLinkEl.href = report.csvPaths?.outsideRegistration || "#";
+  registeredNotAttendedCsvLinkEl.href = report.csvPaths?.registeredNotAttended || "#";
+  participantChatCsvLinkEl.href = report.csvPaths?.chat || "#";
+}
+
+function renderConversion() {
+  const conversion = paymentAttendancePayload?.conversionAnalysis;
+  if (!conversion) {
+    conversionMethodologyEl.textContent = "No conversion report has been generated yet.";
+    return;
+  }
+
+  conversionMethodologyEl.textContent = "Course buyers are matched back to prior webinar-only, bundle-only, or combo registrations using the same email, phone, and normalized-name rules.";
+  const breakdown = conversion.byRegistrationType || {};
+  conversionKpisEl.innerHTML = buildKpis([
+    { label: "Course purchases", value: conversion.coursePurchases || 0 },
+    { label: "From webinar only", value: breakdown["Webinar only"] || 0 },
+    { label: "From combo", value: breakdown["Combo: webinar + bundle"] || 0 },
+    { label: "From bundle only", value: breakdown["Bundle only"] || 0 },
+    { label: "No prior registration found", value: breakdown["No prior webinar/bundle registration found"] || 0 },
+  ]);
+
+  const rows = (conversion.buyers || []).map((buyer) => [
+    escapeHtml(buyer.name || "-"),
+    escapeHtml(buyer.email || "-"),
+    escapeHtml(buyer.phone || "-"),
+    escapeHtml(buyer.registrationType || "-"),
+    escapeHtml(formatDateTimeIst(buyer.registrationDate)),
+    escapeHtml(formatDateTimeIst(buyer.coursePurchaseDate)),
+    escapeHtml(buyer.gateway || "-"),
+    escapeHtml(buyer.paymentId || "-"),
+    escapeHtml(formatCurrency(buyer.amount)),
+  ]);
+  conversionTableEl.innerHTML = buildTable(
+    ["Name", "Email", "Phone", "Prior Registration Type", "Registration Date", "Course Purchase Date", "Gateway", "Payment ID", "Amount"],
+    rows,
+    "No course purchases found."
+  );
 }
 
 function renderSummary(payload) {
@@ -389,6 +549,8 @@ function render(payload) {
   renderSummary(payload);
   renderTables(payload);
   renderFifteenMinuteAnalysis(payload);
+  renderPaymentAttendance();
+  renderConversion();
 }
 
 async function loadManifest() {
@@ -420,6 +582,16 @@ async function loadAggregate() {
   renderAggregate();
 }
 
+async function loadPaymentAttendance() {
+  const response = await fetch(`data/payment-attendance-report.json?ts=${Date.now()}`);
+  if (!response.ok) {
+    paymentAttendancePayload = null;
+    return;
+  }
+
+  paymentAttendancePayload = await response.json();
+}
+
 async function loadReport(reportJsonPath) {
   const response = await fetch(`${reportJsonPath}?ts=${Date.now()}`);
   if (!response.ok) {
@@ -429,6 +601,15 @@ async function loadReport(reportJsonPath) {
   currentReportPath = reportJsonPath;
   const payload = await response.json();
   render(payload);
+}
+
+async function refreshCurrentReport() {
+  if (!currentReportPath) {
+    return;
+  }
+  const selectedReportPath = currentReportPath;
+  await Promise.all([loadAggregate(), loadPaymentAttendance()]);
+  await loadReport(selectedReportPath);
 }
 
 function setActiveView(viewId) {
@@ -453,13 +634,18 @@ function attachInteractions() {
 }
 
 async function init() {
-  await Promise.all([loadManifest(), loadAggregate()]);
+  await Promise.all([loadManifest(), loadAggregate(), loadPaymentAttendance()]);
   attachInteractions();
   if (webinarManifest[0]) {
     webinarSelectEl.value = webinarManifest[0].reportJson;
     await loadReport(webinarManifest[0].reportJson);
   }
   setActiveView("uniqueParticipantsView");
+  window.setInterval(() => {
+    refreshCurrentReport().catch(() => {
+      // Keep the current dashboard visible if a background refresh races with a file write.
+    });
+  }, 1000);
 }
 
 init().catch((error) => {

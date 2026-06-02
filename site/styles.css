@@ -266,6 +266,53 @@ body {
   gap: 12px;
 }
 
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0 18px;
+}
+
+.kpi-card {
+  min-height: 86px;
+  padding: 13px 14px;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.78);
+  display: grid;
+  align-content: space-between;
+  gap: 10px;
+}
+
+.kpi-card span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+.kpi-card strong {
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+
+.report-block {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  margin-top: 16px;
+}
+
+.report-block h3 {
+  margin: 0 0 6px;
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.chat-message {
+  max-width: 460px;
+  white-space: normal;
+  line-height: 1.35;
+}
+
 .chart-card {
   background: rgba(255, 255, 255, 0.78);
   border: 1px solid var(--card-border);
@@ -308,6 +355,10 @@ body {
   .chart-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
@@ -334,6 +385,10 @@ body {
   }
 
   .chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kpi-grid {
     grid-template-columns: 1fr;
   }
 }

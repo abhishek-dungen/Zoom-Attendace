@@ -4,7 +4,7 @@
     "webinarLengthMinutes": 277.4,
     "sessionRecords": 174.6,
     "uniqueParticipants": 78.8,
-    "effectiveWebinarLengthSeconds": 16093,
+    "effectiveWebinarLengthSeconds": 14745,
     "droppedBeforeCourse": 27.2,
     "droppedDuringPitchWindow": 13.2,
     "stayedTillEnd": 15.4
@@ -23,8 +23,8 @@
   "series": [
     {
       "serial": 1,
-      "date": "31 May 2026",
-      "weekday": "Sunday",
+      "date": "2026-05-31T12:46:18Z",
+      "weekday": "",
       "uniqueParticipants": 84,
       "droppedBeforeCoursePercent": 35.71,
       "droppedDuringPitchWindowPercent": 20.24,
@@ -32,8 +32,8 @@
     },
     {
       "serial": 2,
-      "date": "24 May 2026",
-      "weekday": "Sunday",
+      "date": "2026-05-24T13:05:18Z",
+      "weekday": "",
       "uniqueParticipants": 71,
       "droppedBeforeCoursePercent": 40.85,
       "droppedDuringPitchWindowPercent": 18.31,
@@ -41,8 +41,8 @@
     },
     {
       "serial": 3,
-      "date": "17 May 2026",
-      "weekday": "Sunday",
+      "date": "2026-05-17T12:55:13Z",
+      "weekday": "",
       "uniqueParticipants": 75,
       "droppedBeforeCoursePercent": 25.33,
       "droppedDuringPitchWindowPercent": 20,
@@ -50,8 +50,8 @@
     },
     {
       "serial": 4,
-      "date": "10 May 2026",
-      "weekday": "Sunday",
+      "date": "2026-05-10T12:58:34Z",
+      "weekday": "",
       "uniqueParticipants": 93,
       "droppedBeforeCoursePercent": 36.56,
       "droppedDuringPitchWindowPercent": 13.98,
@@ -59,237 +59,12 @@
     },
     {
       "serial": 5,
-      "date": "3 May 2026",
-      "weekday": "Sunday",
+      "date": "2026-05-03T13:08:18Z",
+      "weekday": "",
       "uniqueParticipants": 71,
       "droppedBeforeCoursePercent": 33.8,
       "droppedDuringPitchWindowPercent": 11.27,
       "stayedTillEndPercent": 14.08
     }
-  ],
-  "historicalFifteenMinuteAnalysis": {
-    "bucketMinutes": 15,
-    "buckets": [
-      {
-        "slotNumber": 1,
-        "startOffsetMinutes": 0,
-        "endOffsetMinutes": 15,
-        "offsetRangeLabel": "0-15 min",
-        "webinarCount": 5,
-        "uniqueParticipantsBase": 394,
-        "permanentDropouts": 2,
-        "permanentDropoutPercent": 0.51
-      },
-      {
-        "slotNumber": 2,
-        "startOffsetMinutes": 15,
-        "endOffsetMinutes": 30,
-        "offsetRangeLabel": "15-30 min",
-        "webinarCount": 5,
-        "uniqueParticipantsBase": 394,
-        "permanentDropouts": 5,
-        "permanentDropoutPercent": 1.27
-      },
-      {
-        "slotNumber": 3,
-        "startOffsetMinutes": 30,
-        "endOffsetMinutes": 45,
-        "offsetRangeLabel": "30-45 min",
-        "webinarCount": 5,
-        "uniqueParticipantsBase": 394,
-        "permanentDropouts": 16,
-        "permanentDropoutPercent": 4.06
-      },
-      {
-        "slotNumber": 4,
-        "startOffsetMinutes": 45,
-        "endOffsetMinutes": 60,
-        "offsetRangeLabel": "45-60 min",
-        "webinarCount": 5,
-        "uniqueParticipantsBase": 394,
-        "permanentDropouts": 19,
-        "permanentDropoutPercent": 4.82
-      },
-      {
-        "slotNumber": 5,
-        "startOffsetMinutes": 60,
-        "endOffsetMinutes": 75,
-        "offsetRangeLabel": "60-75 min",
-        "webinarCount": 5,
-        "uniqueParticipantsBase": 394,
-        "permanentDropouts": 23,
-        "permanentDropoutPercent": 5.84
-      },
-      {
-        "slotNumber": 6,
-        "startOffsetMinutes": 75,
-        "endOffsetMinutes": 90,
-        "offsetRangeLabel": "75-90 min",
-        "webinarCount": 5,
-        "uniqueParticipantsBase": 394,
-        "permanentDropouts": 20,
-        "permanentDropoutPercent": 5.08
-      },
-      {
-        "slotNumber": 7,
-        "startOffsetMinutes": 90,
-        "endOffsetMinutes": 105,
-        "offsetRangeLabel": "90-105 min",
-        "webinarCount": 5,
-        "uniqueParticipantsBase": 394,
-        "permanentDropouts": 24,
-        "permanentDropoutPercent": 6.09
-      },
-      {
-        "slotNumber": 8,
-        "startOffsetMinutes": 105,
-        "endOffsetMinutes": 120,
-        "offsetRangeLabel": "105-120 min",
-        "webinarCount": 5,
-        "uniqueParticipantsBase": 394,
-        "permanentDropouts": 22,
-        "permanentDropoutPercent": 5.58
-      },
-      {
-        "slotNumber": 9,
-        "startOffsetMinutes": 120,
-        "endOffsetMinutes": 135,
-        "offsetRangeLabel": "120-135 min",
-        "webinarCount": 5,
-        "uniqueParticipantsBase": 394,
-        "permanentDropouts": 19,
-        "permanentDropoutPercent": 4.82
-      },
-      {
-        "slotNumber": 10,
-        "startOffsetMinutes": 135,
-        "endOffsetMinutes": 150,
-        "offsetRangeLabel": "135-150 min",
-        "webinarCount": 5,
-        "uniqueParticipantsBase": 394,
-        "permanentDropouts": 30,
-        "permanentDropoutPercent": 7.61
-      },
-      {
-        "slotNumber": 11,
-        "startOffsetMinutes": 150,
-        "endOffsetMinutes": 165,
-        "offsetRangeLabel": "150-165 min",
-        "webinarCount": 5,
-        "uniqueParticipantsBase": 394,
-        "permanentDropouts": 32,
-        "permanentDropoutPercent": 8.12
-      },
-      {
-        "slotNumber": 12,
-        "startOffsetMinutes": 165,
-        "endOffsetMinutes": 180,
-        "offsetRangeLabel": "165-180 min",
-        "webinarCount": 5,
-        "uniqueParticipantsBase": 394,
-        "permanentDropouts": 21,
-        "permanentDropoutPercent": 5.33
-      },
-      {
-        "slotNumber": 13,
-        "startOffsetMinutes": 180,
-        "endOffsetMinutes": 195,
-        "offsetRangeLabel": "180-195 min",
-        "webinarCount": 5,
-        "uniqueParticipantsBase": 394,
-        "permanentDropouts": 16,
-        "permanentDropoutPercent": 4.06
-      },
-      {
-        "slotNumber": 14,
-        "startOffsetMinutes": 195,
-        "endOffsetMinutes": 210,
-        "offsetRangeLabel": "195-210 min",
-        "webinarCount": 5,
-        "uniqueParticipantsBase": 394,
-        "permanentDropouts": 10,
-        "permanentDropoutPercent": 2.54
-      },
-      {
-        "slotNumber": 15,
-        "startOffsetMinutes": 210,
-        "endOffsetMinutes": 225,
-        "offsetRangeLabel": "210-225 min",
-        "webinarCount": 5,
-        "uniqueParticipantsBase": 394,
-        "permanentDropouts": 20,
-        "permanentDropoutPercent": 5.08
-      },
-      {
-        "slotNumber": 16,
-        "startOffsetMinutes": 225,
-        "endOffsetMinutes": 233,
-        "offsetRangeLabel": "225-233 min",
-        "webinarCount": 5,
-        "uniqueParticipantsBase": 394,
-        "permanentDropouts": 15,
-        "permanentDropoutPercent": 3.81
-      },
-      {
-        "slotNumber": 17,
-        "startOffsetMinutes": 240,
-        "endOffsetMinutes": 253,
-        "offsetRangeLabel": "240-253 min",
-        "webinarCount": 4,
-        "uniqueParticipantsBase": 310,
-        "permanentDropouts": 10,
-        "permanentDropoutPercent": 3.23
-      },
-      {
-        "slotNumber": 18,
-        "startOffsetMinutes": 255,
-        "endOffsetMinutes": 270,
-        "offsetRangeLabel": "255-270 min",
-        "webinarCount": 3,
-        "uniqueParticipantsBase": 239,
-        "permanentDropouts": 7,
-        "permanentDropoutPercent": 2.93
-      },
-      {
-        "slotNumber": 19,
-        "startOffsetMinutes": 270,
-        "endOffsetMinutes": 285,
-        "offsetRangeLabel": "270-285 min",
-        "webinarCount": 3,
-        "uniqueParticipantsBase": 239,
-        "permanentDropouts": 4,
-        "permanentDropoutPercent": 1.67
-      },
-      {
-        "slotNumber": 20,
-        "startOffsetMinutes": 285,
-        "endOffsetMinutes": 290,
-        "offsetRangeLabel": "285-290 min",
-        "webinarCount": 2,
-        "uniqueParticipantsBase": 168,
-        "permanentDropouts": 2,
-        "permanentDropoutPercent": 1.19
-      }
-    ],
-    "highestDropSlot": {
-      "slotNumber": 11,
-      "startOffsetMinutes": 150,
-      "endOffsetMinutes": 165,
-      "offsetRangeLabel": "150-165 min",
-      "webinarCount": 5,
-      "uniqueParticipantsBase": 394,
-      "permanentDropouts": 32,
-      "permanentDropoutPercent": 8.12
-    },
-    "lowestDropSlot": {
-      "slotNumber": 1,
-      "startOffsetMinutes": 0,
-      "endOffsetMinutes": 15,
-      "offsetRangeLabel": "0-15 min",
-      "webinarCount": 5,
-      "uniqueParticipantsBase": 394,
-      "permanentDropouts": 2,
-      "permanentDropoutPercent": 0.51
-    }
-  }
+  ]
 }

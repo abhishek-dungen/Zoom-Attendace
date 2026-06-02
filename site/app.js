@@ -8,8 +8,9 @@ const effectiveDurationEl = document.getElementById("effectiveDuration");
 const droppedBeforeCourseMetricEl = document.getElementById("droppedBeforeCourseMetric");
 const droppedAfterCourseMetricEl = document.getElementById("droppedAfterCourseMetric");
 const stayedTillEndMetricEl = document.getElementById("stayedTillEndMetric");
-const lengthSourceTextEl = document.getElementById("lengthSourceText");
 const courseRevealSourceEl = document.getElementById("courseRevealSource");
+const overviewPanelEl = document.querySelector(".overview-panel");
+const reportTilesEl = document.getElementById("reportTiles");
 const uniqueParticipantsTableEl = document.getElementById("uniqueParticipantsTable");
 const beforeCourseTableEl = document.getElementById("beforeCourseTable");
 const afterCourseTableEl = document.getElementById("afterCourseTable");
@@ -23,6 +24,9 @@ const historicalPaymentTableEl = document.getElementById("historicalPaymentTable
 const conversionMethodologyEl = document.getElementById("conversionMethodology");
 const conversionKpisEl = document.getElementById("conversionKpis");
 const conversionTableEl = document.getElementById("conversionTable");
+const historicalConversionMethodologyEl = document.getElementById("historicalConversionMethodology");
+const historicalConversionKpisEl = document.getElementById("historicalConversionKpis");
+const historicalConversionTableEl = document.getElementById("historicalConversionTable");
 const uniqueCsvLinkEl = document.getElementById("uniqueCsvLink");
 const beforeCourseCsvLinkEl = document.getElementById("beforeCourseCsvLink");
 const afterCourseCsvLinkEl = document.getElementById("afterCourseCsvLink");
@@ -45,11 +49,15 @@ const chartFifteenMinuteSelectedJoinsEl = document.getElementById("chartFifteenM
 const chartFifteenMinuteSelectedDropsEl = document.getElementById("chartFifteenMinuteSelectedDrops");
 const chartFifteenMinuteHistoricalJoinsEl = document.getElementById("chartFifteenMinuteHistoricalJoins");
 const chartFifteenMinuteHistoricalDropsEl = document.getElementById("chartFifteenMinuteHistoricalDrops");
+const chartHistoricalOnlyJoinsEl = document.getElementById("chartHistoricalOnlyJoins");
+const chartHistoricalOnlyDropsEl = document.getElementById("chartHistoricalOnlyDrops");
 const fifteenMinuteSelectedNoteEl = document.getElementById("fifteenMinuteSelectedNote");
 const fifteenMinuteSelectedDropNoteEl = document.getElementById("fifteenMinuteSelectedDropNote");
 const fifteenMinuteHistoricalJoinNoteEl = document.getElementById("fifteenMinuteHistoricalJoinNote");
 const fifteenMinuteHistoricalNoteEl = document.getElementById("fifteenMinuteHistoricalNote");
-const tileButtons = [...document.querySelectorAll(".tile-button")];
+const historicalOnlyJoinNoteEl = document.getElementById("historicalOnlyJoinNote");
+const historicalOnlyDropNoteEl = document.getElementById("historicalOnlyDropNote");
+const groupButtons = [...document.querySelectorAll("[data-report-group]")];
 const reportViews = [...document.querySelectorAll(".report-view")];
 
 let webinarManifest = [];
@@ -58,6 +66,11 @@ let paymentAttendancePayload = null;
 let historicalReportPayloads = [];
 let currentPayload = null;
 let activePaymentReportKey = "sameWeekRegisteredAttended";
+let activeReportGroup = "webinar";
+let activeViewByGroup = {
+  webinar: "uniqueParticipantsView",
+  historical: "historicalPaymentAttendanceView",
+};
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -295,6 +308,48 @@ function buildKpis(items, activeKey = "") {
     .join("");
 }
 
+function tileLabel(label, count, showCount = true) {
+  return showCount ? `${label} (${count})` : label;
+}
+
+function renderReportTiles() {
+  if (!currentPayload) {
+    reportTilesEl.innerHTML = "";
+    return;
+  }
+  const conversion = paymentAttendancePayload?.conversionAnalysis;
+  const currentReport = currentPaymentReport();
+  const weeklyCourseBuyers = getWeeklyCourseBuyers(currentReport).length;
+  const tiles =
+    activeReportGroup === "webinar"
+      ? [
+          { view: "uniqueParticipantsView", label: tileLabel("Unique participants list", currentPayload.summary?.uniqueParticipants || 0) },
+          { view: "beforeCourseView", label: tileLabel("Dropped before course", currentPayload.summary?.droppedBeforeCourseCount || 0) },
+          { view: "afterCourseView", label: tileLabel("Dropped in next 30 min", currentPayload.summary?.droppedDuringPitchWindowCount || 0) },
+          { view: "stayedTillEndView", label: tileLabel("Stayed till end", currentPayload.summary?.stayedTillEndCount || 0) },
+          { view: "paymentAttendanceView", label: "Payment + attendance" },
+          { view: "conversionView", label: tileLabel("Course conversion", weeklyCourseBuyers) },
+          { view: "fifteenMinuteView", label: "15-minute analysis" },
+        ]
+      : [
+          { view: "historicalPaymentAttendanceView", label: "Historical payment + attendance" },
+          { view: "historicalConversionView", label: tileLabel("Historical course conversion", conversion?.coursePurchases || 0) },
+          { view: "historicalFifteenMinuteView", label: "Historical 15-minute analysis" },
+          { view: "consolidatedView", label: "Consolidated report" },
+        ];
+
+  const activeView = activeViewByGroup[activeReportGroup];
+  reportTilesEl.innerHTML = tiles
+    .map(
+      (tile) => `
+        <button class="tile-button ${tile.view === activeView ? "is-active" : ""}" data-view="${escapeHtml(tile.view)}" type="button">
+          ${escapeHtml(tile.label)}
+        </button>
+      `
+    )
+    .join("");
+}
+
 function renderTables(payload) {
   const headers = [
     "Name",
@@ -413,6 +468,22 @@ function renderPaymentAttendance() {
       : buildTable(paymentHeaders, paymentRows(selected.rows), selected.empty);
 }
 
+function getWeeklyCourseBuyers(report) {
+  const conversion = paymentAttendancePayload?.conversionAnalysis;
+  if (!conversion || !report) {
+    return [];
+  }
+  const start = new Date(report.weekStart || "");
+  const end = new Date(report.weekEnd || "");
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return [];
+  }
+  return (conversion.buyers || []).filter((buyer) => {
+    const date = new Date(buyer.coursePurchaseDate || "");
+    return !Number.isNaN(date.getTime()) && date >= start && date <= end;
+  });
+}
+
 function renderHistoricalPaymentAttendance() {
   if (!paymentAttendancePayload?.reports?.length) {
     historicalPaymentKpisEl.innerHTML = "";
@@ -484,19 +555,12 @@ function renderConversion() {
   const conversion = paymentAttendancePayload?.conversionAnalysis;
   if (!conversion) {
     conversionMethodologyEl.textContent = "No conversion report has been generated yet.";
+    historicalConversionMethodologyEl.textContent = "No conversion report has been generated yet.";
     return;
   }
 
-  conversionMethodologyEl.textContent = "Course buyers are matched back to prior webinar or combo registrations using email first, then phone number.";
-  const breakdown = conversion.byRegistrationType || {};
-  conversionKpisEl.innerHTML = buildKpis([
-    { label: "Course purchases", value: conversion.coursePurchases || 0 },
-    { label: "From webinar", value: breakdown.Webinar || 0 },
-    { label: "From combo", value: breakdown.Combo || 0 },
-    { label: "No prior registration found", value: breakdown["No prior webinar/bundle registration found"] || 0 },
-  ]);
-
-  const rows = (conversion.buyers || []).map((buyer) => [
+  const weeklyBuyers = getWeeklyCourseBuyers(currentPaymentReport());
+  const buildRows = (buyers) => buyers.map((buyer) => [
     escapeHtml(buyer.name || "-"),
     escapeHtml(buyer.email || "-"),
     escapeHtml(buyer.phone || "-"),
@@ -507,10 +571,40 @@ function renderConversion() {
     escapeHtml(buyer.paymentId || "-"),
     escapeHtml(formatCurrency(buyer.amount)),
   ]);
+
+  const countByType = (buyers) =>
+    buyers.reduce((acc, buyer) => {
+      const type = formatRegistrationType(buyer.registrationType);
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {});
+
+  const weeklyBreakdown = countByType(weeklyBuyers);
+  conversionMethodologyEl.textContent = "Course buyers in the selected webinar week, matched back to prior webinar or combo registrations using email first, then phone number.";
+  conversionKpisEl.innerHTML = buildKpis([
+    { label: "Course purchases", value: weeklyBuyers.length },
+    { label: "From webinar", value: weeklyBreakdown.Webinar || 0 },
+    { label: "From combo", value: weeklyBreakdown.Combo || 0 },
+    { label: "No prior registration found", value: weeklyBreakdown["No prior webinar/bundle registration found"] || 0 },
+  ]);
   conversionTableEl.innerHTML = buildTable(
     ["Name", "Email", "Phone", "Prior Registration Type", "Registration Date", "Course Purchase Date", "Gateway", "Payment ID", "Amount"],
-    rows,
-    "No course purchases found."
+    buildRows(weeklyBuyers),
+    "No course purchases found for this webinar week."
+  );
+
+  const historicalBreakdown = conversion.byRegistrationType || {};
+  historicalConversionMethodologyEl.textContent = "All course buyers across the historical payment data, matched back using email first, then phone number.";
+  historicalConversionKpisEl.innerHTML = buildKpis([
+    { label: "Course purchases", value: conversion.coursePurchases || 0 },
+    { label: "From webinar", value: historicalBreakdown.Webinar || 0 },
+    { label: "From combo", value: historicalBreakdown.Combo || 0 },
+    { label: "No prior registration found", value: historicalBreakdown["No prior webinar/bundle registration found"] || 0 },
+  ]);
+  historicalConversionTableEl.innerHTML = buildTable(
+    ["Name", "Email", "Phone", "Prior Registration Type", "Registration Date", "Course Purchase Date", "Gateway", "Payment ID", "Amount"],
+    buildRows(conversion.buyers || []),
+    "No historical course purchases found."
   );
 }
 
@@ -524,10 +618,6 @@ function renderSummary(payload) {
   renderMetricText(droppedAfterCourseMetricEl, payload.summary?.droppedDuringPitchWindowCount || 0, payload.summary?.droppedDuringPitchWindowPercent || 0);
   renderMetricText(stayedTillEndMetricEl, payload.summary?.stayedTillEndCount || 0, payload.summary?.stayedTillEndPercent || 0);
 
-  lengthSourceTextEl.textContent =
-    payload.effectiveWindow?.startSource === "first_participant_chat_detected"
-      ? "Calculated from first participant chat"
-      : "No Zoom chat file found; using webinar start time";
   courseRevealSourceEl.textContent =
     payload.courseReveal?.source === "admin_chat_detected"
       ? "Detected from admin chat"
@@ -692,6 +782,8 @@ function renderFifteenMinuteAnalysis(payload) {
   chartFifteenMinuteSelectedDropsEl.innerHTML = createBarChart(selectedDropSeries, "count", "timeLabel", false);
   chartFifteenMinuteHistoricalJoinsEl.innerHTML = createBarChart(historicalJoinSeries, "count", "timeLabel", false);
   chartFifteenMinuteHistoricalDropsEl.innerHTML = createBarChart(historicalDropSeries, "count", "timeLabel", false);
+  chartHistoricalOnlyJoinsEl.innerHTML = createBarChart(historicalJoinSeries, "count", "timeLabel", false);
+  chartHistoricalOnlyDropsEl.innerHTML = createBarChart(historicalDropSeries, "count", "timeLabel", false);
 
   fifteenMinuteSelectedNoteEl.textContent = "Unique first joins are counted in fixed 15-minute slots from 7:00 PM IST.";
   fifteenMinuteSelectedDropNoteEl.textContent = "Final drops are counted in fixed 15-minute slots from 7:00 PM IST.";
@@ -701,6 +793,8 @@ function renderFifteenMinuteAnalysis(payload) {
   fifteenMinuteHistoricalNoteEl.textContent = historicalReportPayloads.length
     ? `Historical final drops across ${historicalReportPayloads.length} webinars, using fixed 7:00 PM IST slots.`
     : "No historical dropout data available yet.";
+  historicalOnlyJoinNoteEl.textContent = fifteenMinuteHistoricalJoinNoteEl.textContent;
+  historicalOnlyDropNoteEl.textContent = fifteenMinuteHistoricalNoteEl.textContent;
 }
 
 function renderAggregate() {
@@ -738,6 +832,7 @@ function render(payload) {
   renderPaymentAttendance();
   renderHistoricalPaymentAttendance();
   renderConversion();
+  renderReportTiles();
 }
 
 async function loadManifest() {
@@ -815,12 +910,21 @@ async function refreshCurrentReport() {
 }
 
 function setActiveView(viewId) {
-  for (const button of tileButtons) {
-    button.classList.toggle("is-active", button.dataset.view === viewId);
-  }
+  activeViewByGroup[activeReportGroup] = viewId;
   for (const view of reportViews) {
     view.classList.toggle("is-active", view.id === viewId);
   }
+  renderReportTiles();
+}
+
+function setActiveGroup(group) {
+  activeReportGroup = group;
+  for (const button of groupButtons) {
+    button.classList.toggle("is-active", button.dataset.reportGroup === group);
+  }
+  overviewPanelEl.style.display = group === "webinar" ? "" : "none";
+  renderReportTiles();
+  setActiveView(activeViewByGroup[group]);
 }
 
 function attachInteractions() {
@@ -828,11 +932,19 @@ function attachInteractions() {
     await loadReport(event.target.value);
   });
 
-  for (const button of tileButtons) {
+  for (const button of groupButtons) {
     button.addEventListener("click", () => {
-      setActiveView(button.dataset.view);
+      setActiveGroup(button.dataset.reportGroup);
     });
   }
+
+  reportTilesEl.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-view]");
+    if (!button) {
+      return;
+    }
+    setActiveView(button.dataset.view);
+  });
 
   paymentKpisEl.addEventListener("click", (event) => {
     const button = event.target.closest("[data-payment-report]");
@@ -852,7 +964,7 @@ async function init() {
     webinarSelectEl.value = webinarManifest[0].reportJson;
     await loadReport(webinarManifest[0].reportJson);
   }
-  setActiveView("uniqueParticipantsView");
+  setActiveGroup("webinar");
   window.setInterval(() => {
     refreshCurrentReport().catch(() => {
       // Keep the current dashboard visible if a background refresh races with a file write.

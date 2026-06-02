@@ -586,15 +586,23 @@ function isAdminSender(senderName, hostName) {
 }
 
 function buildEffectiveWebinarWindow(webinar, chatMessages, hostName) {
-  const firstParticipantChatTime = chatMessages
-    .filter((message) => !isAdminSender(message.senderName, hostName))
-    .map((message) => message.absoluteTime)
-    .find((absoluteTime) => Boolean(absoluteTime));
+  const webinarStart = parseIsoDate(webinar.start_time || "");
+  let fixedStartTime = webinar.start_time || "";
+  if (webinarStart) {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(webinarStart);
+    const getPart = (type) => Number(parts.find((part) => part.type === type)?.value || 0);
+    fixedStartTime = new Date(Date.UTC(getPart("year"), getPart("month") - 1, getPart("day"), 13, 30, 0)).toISOString();
+  }
 
   return {
-    effectiveStartTime: firstParticipantChatTime || webinar.start_time || "",
+    effectiveStartTime: fixedStartTime,
     effectiveEndTime: webinar.end_time || "",
-    effectiveStartSource: firstParticipantChatTime ? "first_participant_chat_detected" : "webinar_start_time",
+    effectiveStartSource: "fixed_7pm_ist",
   };
 }
 
@@ -990,10 +998,7 @@ async function main() {
       participantsCount: webinar.participants_count ?? participants.length,
     },
     methodology: {
-      webinarLengthRule:
-        webinarWindow.effectiveStartSource === "first_participant_chat_detected"
-          ? "Attendance calculations use the first saved non-admin chat message time through webinar end."
-          : "Attendance calculations use webinar start time through webinar end because no chat was available.",
+      webinarLengthRule: "Attendance calculations use fixed 7:00 PM IST through webinar end.",
       courseRevealRule:
         courseReveal.courseRevealSource === "admin_chat_detected"
           ? "Course reveal time was detected from the first admin chat message containing course/price/link details."

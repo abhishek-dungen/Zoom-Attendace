@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Zoom Webinar Analysis</title>
-    <link rel="stylesheet" href="styles.css?v=20260602-03" />
+    <link rel="stylesheet" href="styles.css?v=20260602-04" />
   </head>
   <body>
     <main class="page">
@@ -15,34 +15,30 @@
         </select>
       </section>
 
+      <section class="panel tiles-panel">
+        <div class="report-tiles">
+          <button class="tile-button is-active" data-report-group="webinar" type="button">Webinar specific</button>
+          <button class="tile-button" data-report-group="historical" type="button">Historical analysis</button>
+        </div>
+      </section>
+
       <section class="panel overview-panel">
         <table class="metric-table" id="summary">
           <tbody>
             <tr><th>Unique Participants</th><td id="uniqueParticipants">0</td></tr>
             <tr><th>Webinar Date</th><td id="webinarDate">-</td></tr>
-            <tr><th>Effective Webinar Length</th><td id="effectiveDuration">-</td></tr>
+            <tr><th>Webinar Length</th><td id="effectiveDuration">-</td></tr>
             <tr><th>Course Reveal Time</th><td id="courseRevealTime">-</td></tr>
             <tr><th>Dropped before course</th><td id="droppedBeforeCourseMetric">0</td></tr>
             <tr><th>Dropped in next 30 min</th><td id="droppedAfterCourseMetric">0</td></tr>
             <tr><th>Stayed till end</th><td id="stayedTillEndMetric">0</td></tr>
-            <tr><th>Length Source</th><td id="lengthSourceText">-</td></tr>
             <tr><th>Course reveal source</th><td id="courseRevealSource">-</td></tr>
           </tbody>
         </table>
       </section>
 
       <section class="panel tiles-panel">
-        <div class="report-tiles">
-          <button class="tile-button is-active" data-view="uniqueParticipantsView" type="button">Unique participants list</button>
-          <button class="tile-button" data-view="beforeCourseView" type="button">Dropped before course</button>
-          <button class="tile-button" data-view="afterCourseView" type="button">Dropped in next 30 min</button>
-          <button class="tile-button" data-view="stayedTillEndView" type="button">Stayed till end</button>
-          <button class="tile-button" data-view="paymentAttendanceView" type="button">Payment + attendance</button>
-          <button class="tile-button" data-view="historicalPaymentAttendanceView" type="button">Historical payment + attendance</button>
-          <button class="tile-button" data-view="conversionView" type="button">Course conversion</button>
-          <button class="tile-button" data-view="fifteenMinuteView" type="button">15-minute analysis</button>
-          <button class="tile-button" data-view="consolidatedView" type="button">Consolidated report</button>
-        </div>
+        <div class="report-tiles" id="reportTiles"></div>
       </section>
 
       <section class="panel table-panel report-view is-active" id="uniqueParticipantsView">
@@ -109,6 +105,15 @@
         <div class="table-wrap" id="conversionTable"></div>
       </section>
 
+      <section class="panel table-panel report-view" id="historicalConversionView">
+        <div class="section-head">
+          <h2>Historical Course Conversion</h2>
+          <p class="chart-note" id="historicalConversionMethodology">Loading conversion report...</p>
+        </div>
+        <div class="kpi-grid" id="historicalConversionKpis"></div>
+        <div class="table-wrap" id="historicalConversionTable"></div>
+      </section>
+
       <section class="panel table-panel report-view" id="fifteenMinuteView">
         <div class="chart-stack">
           <article class="chart-card chart-card-wide">
@@ -138,6 +143,25 @@
               <p class="chart-note" id="fifteenMinuteHistoricalNote">Loading...</p>
             </div>
             <div id="chartFifteenMinuteHistoricalDrops"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel table-panel report-view" id="historicalFifteenMinuteView">
+        <div class="chart-stack">
+          <article class="chart-card chart-card-wide">
+            <div class="section-head">
+              <h2>Historical 15-minute joins</h2>
+              <p class="chart-note" id="historicalOnlyJoinNote">Loading...</p>
+            </div>
+            <div id="chartHistoricalOnlyJoins"></div>
+          </article>
+          <article class="chart-card chart-card-wide">
+            <div class="section-head">
+              <h2>Historical 15-minute dropouts</h2>
+              <p class="chart-note" id="historicalOnlyDropNote">Loading...</p>
+            </div>
+            <div id="chartHistoricalOnlyDrops"></div>
           </article>
         </div>
       </section>
@@ -178,6 +202,6 @@
       </section>
     </main>
 
-    <script type="module" src="app.js?v=20260602-03"></script>
+    <script type="module" src="app.js?v=20260602-04"></script>
   </body>
 </html>

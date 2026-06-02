@@ -25,7 +25,7 @@
         "stayedTillEndCount": 18,
         "stayedTillEndPercent": 21.43
       },
-      "effectiveDurationSeconds": 14018,
+      "effectiveDurationSeconds": 14035,
       "webinarDurationMinutes": 278,
       "fifteenMinuteAnalysis": {
         "bucketMinutes": 15,
@@ -289,7 +289,8 @@
             "participantKeys": []
           }
         ]
-      }
+      },
+      "effectiveDurationFormatted": "3h 53m"
     },
     {
       "serial": 2,
@@ -316,7 +317,7 @@
         "stayedTillEndCount": 19,
         "stayedTillEndPercent": 26.76
       },
-      "effectiveDurationSeconds": 15223,
+      "effectiveDurationSeconds": 13741,
       "webinarDurationMinutes": 254,
       "fifteenMinuteAnalysis": {
         "bucketMinutes": 15,
@@ -574,7 +575,8 @@
             "participantKeys": []
           }
         ]
-      }
+      },
+      "effectiveDurationFormatted": "3h 49m"
     },
     {
       "serial": 3,
@@ -601,7 +603,7 @@
         "stayedTillEndCount": 16,
         "stayedTillEndPercent": 21.33
       },
-      "effectiveDurationSeconds": 17427,
+      "effectiveDurationSeconds": 15340,
       "webinarDurationMinutes": 291,
       "fifteenMinuteAnalysis": {
         "bucketMinutes": 15,
@@ -904,7 +906,8 @@
             "participantKeys": []
           }
         ]
-      }
+      },
+      "effectiveDurationFormatted": "4h 15m"
     },
     {
       "serial": 4,
@@ -931,7 +934,7 @@
         "stayedTillEndCount": 14,
         "stayedTillEndPercent": 15.05
       },
-      "effectiveDurationSeconds": 17494,
+      "effectiveDurationSeconds": 15608,
       "webinarDurationMinutes": 292,
       "fifteenMinuteAnalysis": {
         "bucketMinutes": 15,
@@ -1254,7 +1257,8 @@
             ]
           }
         ]
-      }
+      },
+      "effectiveDurationFormatted": "4h 20m"
     },
     {
       "serial": 5,
@@ -1281,7 +1285,7 @@
         "stayedTillEndCount": 10,
         "stayedTillEndPercent": 14.08
       },
-      "effectiveDurationSeconds": 16303,
+      "effectiveDurationSeconds": 15001,
       "webinarDurationMinutes": 272,
       "fifteenMinuteAnalysis": {
         "bucketMinutes": 15,
@@ -1573,7 +1577,8 @@
             "participantKeys": []
           }
         ]
-      }
+      },
+      "effectiveDurationFormatted": "4h 10m"
     }
   ]
 }

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Zoom Webinar Analysis</title>
-    <link rel="stylesheet" href="styles.css?v=20260602-02" />
+    <link rel="stylesheet" href="styles.css?v=20260602-03" />
   </head>
   <body>
     <main class="page">
@@ -38,6 +38,7 @@
           <button class="tile-button" data-view="afterCourseView" type="button">Dropped in next 30 min</button>
           <button class="tile-button" data-view="stayedTillEndView" type="button">Stayed till end</button>
           <button class="tile-button" data-view="paymentAttendanceView" type="button">Payment + attendance</button>
+          <button class="tile-button" data-view="historicalPaymentAttendanceView" type="button">Historical payment + attendance</button>
           <button class="tile-button" data-view="conversionView" type="button">Course conversion</button>
           <button class="tile-button" data-view="fifteenMinuteView" type="button">15-minute analysis</button>
           <button class="tile-button" data-view="consolidatedView" type="button">Consolidated report</button>
@@ -91,6 +92,14 @@
         </article>
       </section>
 
+      <section class="panel table-panel report-view" id="historicalPaymentAttendanceView">
+        <div class="section-head">
+          <h2>Historical Payment + Attendance</h2>
+        </div>
+        <div class="kpi-grid" id="historicalPaymentKpis"></div>
+        <div class="table-wrap" id="historicalPaymentTable"></div>
+      </section>
+
       <section class="panel table-panel report-view" id="conversionView">
         <div class="section-head">
           <h2>Course Conversion By Registration Type</h2>
@@ -104,17 +113,31 @@
         <div class="chart-stack">
           <article class="chart-card chart-card-wide">
             <div class="section-head">
-              <h2>Webinar 15-minute permanent dropouts</h2>
+              <h2>Current webinar 15-minute joins</h2>
               <p class="chart-note" id="fifteenMinuteSelectedNote">Loading...</p>
             </div>
-            <div id="chartFifteenMinuteSelected"></div>
+            <div id="chartFifteenMinuteSelectedJoins"></div>
+          </article>
+          <article class="chart-card chart-card-wide">
+            <div class="section-head">
+              <h2>Current webinar 15-minute permanent dropouts</h2>
+              <p class="chart-note" id="fifteenMinuteSelectedDropNote">Loading...</p>
+            </div>
+            <div id="chartFifteenMinuteSelectedDrops"></div>
+          </article>
+          <article class="chart-card chart-card-wide">
+            <div class="section-head">
+              <h2>Historical 15-minute joins</h2>
+              <p class="chart-note" id="fifteenMinuteHistoricalJoinNote">Loading...</p>
+            </div>
+            <div id="chartFifteenMinuteHistoricalJoins"></div>
           </article>
           <article class="chart-card chart-card-wide">
             <div class="section-head">
               <h2>Historical 15-minute dropout pattern</h2>
               <p class="chart-note" id="fifteenMinuteHistoricalNote">Loading...</p>
             </div>
-            <div id="chartFifteenMinuteHistorical"></div>
+            <div id="chartFifteenMinuteHistoricalDrops"></div>
           </article>
         </div>
       </section>
@@ -155,6 +178,6 @@
       </section>
     </main>
 
-    <script type="module" src="app.js?v=20260602-02"></script>
+    <script type="module" src="app.js?v=20260602-03"></script>
   </body>
 </html>

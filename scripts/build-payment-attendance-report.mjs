@@ -164,7 +164,10 @@ function amountNumber(value) {
 function classify(amount, purpose) {
   const text = clean(purpose).toLowerCase();
   const value = amountNumber(amount);
-  if (value >= 1500 || text.includes("basic to advance excel course") || text.includes("basic-to-advance-excel-course")) {
+  if (
+    value > 500 &&
+    (value >= 1500 || text.includes("basic to advance excel course") || text.includes("basic-to-advance-excel-course"))
+  ) {
     return "course";
   }
   if (190 <= value && value <= 250) {

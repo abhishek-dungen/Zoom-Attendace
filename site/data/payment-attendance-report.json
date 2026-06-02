@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-02T05:35:13.149Z",
+  "generatedAt": "2026-06-02T05:49:21.838Z",
   "methodology": {
     "paymentSources": "Instamojo credit CSV plus PayU captured rows plus Cashfree rows retained after removing Cashfree records marked as Instamojo backend duplicates.",
     "weekDefinition": "Monday 00:00:00 IST to Sunday 23:59:59 IST, matched to the selected webinar's week.",
@@ -19,18 +19,18 @@
       "PayU": 14
     },
     "byClassification": {
-      "Other": 44,
-      "Course": 270,
+      "Other": 51,
+      "Course": 263,
       "Combo": 572,
       "Webinar": 798
     }
   },
   "conversionAnalysis": {
-    "coursePurchases": 270,
+    "coursePurchases": 263,
     "byRegistrationType": {
-      "No prior webinar/bundle registration found": 35,
+      "No prior webinar/bundle registration found": 30,
       "Combo": 132,
-      "Webinar": 103
+      "Webinar": 101
     },
     "buyers": [
       {
@@ -802,28 +802,6 @@
         "gateway": "Instamojo",
         "paymentId": "MOJO6222I05Q33492451",
         "amount": 2000
-      },
-      {
-        "name": "Vijaya Karpe",
-        "email": "vkarpe.11@gmail.com",
-        "phone": "+919325983089",
-        "registrationDate": "2026-02-10T22:50:00.000Z",
-        "registrationType": "Webinar",
-        "coursePurchaseDate": "2026-02-25T02:23:00.000Z",
-        "gateway": "Instamojo",
-        "paymentId": "MOJO6225M05Q31341662",
-        "amount": 9
-      },
-      {
-        "name": "Vijaya  Karpe",
-        "email": "vkarpe.11@gmail.com",
-        "phone": "+919325983089",
-        "registrationDate": "2026-02-10T22:50:00.000Z",
-        "registrationType": "Webinar",
-        "coursePurchaseDate": "2026-02-25T03:37:00.000Z",
-        "gateway": "Instamojo",
-        "paymentId": "MOJO6225T05Q31342408",
-        "amount": 9
       },
       {
         "name": "Amitkumar  Telang",
@@ -2529,61 +2507,6 @@
         "gateway": "Instamojo",
         "paymentId": "MOJO6510M05Q01271480",
         "amount": 2000
-      },
-      {
-        "name": "Abhishek Kumar",
-        "email": "abhishekmkumar676@gmail.com",
-        "phone": "+919886738879",
-        "registrationDate": "",
-        "registrationType": "No prior webinar/bundle registration found",
-        "coursePurchaseDate": "2026-05-14T05:26:00.000Z",
-        "gateway": "Instamojo",
-        "paymentId": "MOJO6514N05Q67251963",
-        "amount": 9
-      },
-      {
-        "name": "Abhishek Kumar",
-        "email": "abhishekmkumar676@gmail.com",
-        "phone": "+919886738879",
-        "registrationDate": "",
-        "registrationType": "No prior webinar/bundle registration found",
-        "coursePurchaseDate": "2026-05-14T05:43:00.000Z",
-        "gateway": "Instamojo",
-        "paymentId": "MOJO6514V05Q67252126",
-        "amount": 9
-      },
-      {
-        "name": "Abhishek Kumar",
-        "email": "abhishekmkumar676@gmail.com",
-        "phone": "+919886738879",
-        "registrationDate": "",
-        "registrationType": "No prior webinar/bundle registration found",
-        "coursePurchaseDate": "2026-05-14T06:17:00.000Z",
-        "gateway": "Instamojo",
-        "paymentId": "MOJO6514305Q67252456",
-        "amount": 9
-      },
-      {
-        "name": "Abhishek Kumar",
-        "email": "abhishekmkumar676@gmail.com",
-        "phone": "+919886738879",
-        "registrationDate": "",
-        "registrationType": "No prior webinar/bundle registration found",
-        "coursePurchaseDate": "2026-05-14T07:34:00.000Z",
-        "gateway": "Instamojo",
-        "paymentId": "MOJO6514X05Q67253146",
-        "amount": 9
-      },
-      {
-        "name": "Abhishek Kumar",
-        "email": "abhishekmkumar676@gmail.com",
-        "phone": "+919886738879",
-        "registrationDate": "",
-        "registrationType": "No prior webinar/bundle registration found",
-        "coursePurchaseDate": "2026-05-14T07:44:00.000Z",
-        "gateway": "Instamojo",
-        "paymentId": "MOJO6514Y05Q67253236",
-        "amount": 9
       },
       {
         "name": "Ashish Deshwal",

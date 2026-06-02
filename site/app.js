@@ -18,6 +18,8 @@ const paymentKpisEl = document.getElementById("paymentKpis");
 const paymentReportTitleEl = document.getElementById("paymentReportTitle");
 const paymentReportTableEl = document.getElementById("paymentReportTable");
 const paymentReportCsvLinkEl = document.getElementById("paymentReportCsvLink");
+const historicalPaymentKpisEl = document.getElementById("historicalPaymentKpis");
+const historicalPaymentTableEl = document.getElementById("historicalPaymentTable");
 const conversionMethodologyEl = document.getElementById("conversionMethodology");
 const conversionKpisEl = document.getElementById("conversionKpis");
 const conversionTableEl = document.getElementById("conversionTable");
@@ -39,9 +41,13 @@ const chartUniqueParticipantsEl = document.getElementById("chartUniqueParticipan
 const chartBeforePercentEl = document.getElementById("chartBeforePercent");
 const chartAfterPercentEl = document.getElementById("chartAfterPercent");
 const chartStayedPercentEl = document.getElementById("chartStayedPercent");
-const chartFifteenMinuteSelectedEl = document.getElementById("chartFifteenMinuteSelected");
-const chartFifteenMinuteHistoricalEl = document.getElementById("chartFifteenMinuteHistorical");
+const chartFifteenMinuteSelectedJoinsEl = document.getElementById("chartFifteenMinuteSelectedJoins");
+const chartFifteenMinuteSelectedDropsEl = document.getElementById("chartFifteenMinuteSelectedDrops");
+const chartFifteenMinuteHistoricalJoinsEl = document.getElementById("chartFifteenMinuteHistoricalJoins");
+const chartFifteenMinuteHistoricalDropsEl = document.getElementById("chartFifteenMinuteHistoricalDrops");
 const fifteenMinuteSelectedNoteEl = document.getElementById("fifteenMinuteSelectedNote");
+const fifteenMinuteSelectedDropNoteEl = document.getElementById("fifteenMinuteSelectedDropNote");
+const fifteenMinuteHistoricalJoinNoteEl = document.getElementById("fifteenMinuteHistoricalJoinNote");
 const fifteenMinuteHistoricalNoteEl = document.getElementById("fifteenMinuteHistoricalNote");
 const tileButtons = [...document.querySelectorAll(".tile-button")];
 const reportViews = [...document.querySelectorAll(".report-view")];
@@ -49,6 +55,7 @@ const reportViews = [...document.querySelectorAll(".report-view")];
 let webinarManifest = [];
 let aggregatePayload = null;
 let paymentAttendancePayload = null;
+let historicalReportPayloads = [];
 let currentPayload = null;
 let activePaymentReportKey = "sameWeekRegisteredAttended";
 
@@ -134,6 +141,19 @@ function formatShortTimeRangeLabel(value) {
     .replaceAll(" pm", "");
 }
 
+function formatFixedSlotLabel(slotNumber) {
+  const startMinutes = 19 * 60 + (slotNumber - 1) * 15;
+  const endMinutes = startMinutes + 15;
+  const format = (totalMinutes) => {
+    const hours24 = Math.floor(totalMinutes / 60) % 24;
+    const minutes = totalMinutes % 60;
+    const hours12 = hours24 % 12 || 12;
+    const suffix = hours24 < 12 ? "am" : "pm";
+    return `${hours12}:${String(minutes).padStart(2, "0")} ${suffix}`;
+  };
+  return `${format(startMinutes)}-${format(endMinutes)}`;
+}
+
 function formatDurationSeconds(totalSeconds) {
   const seconds = Math.max(0, Number(totalSeconds || 0));
   const hours = Math.floor(seconds / 3600);
@@ -184,6 +204,15 @@ function adjustedPercentages(counts) {
     used += percent;
     return percent;
   });
+}
+
+function paymentOutcomeCounts(report) {
+  return [
+    Number(report?.summary?.sameWeekRegisteredAttended || 0),
+    Number(report?.summary?.priorWeekRegisteredAttended || 0),
+    Number(report?.summary?.outsideRegistrationAttended || 0),
+    Number(report?.summary?.registeredNotAttended || 0),
+  ];
 }
 
 function renderMetricText(element, count, percent) {
@@ -303,13 +332,16 @@ function renderPaymentAttendance() {
     priorWeekRegisteredAttendedPct,
     outsideRegistrationAttendedPct,
     registeredNotAttendedPct,
-  ] = adjustedPercentages([
-    report.summary.sameWeekRegisteredAttended,
-    report.summary.priorWeekRegisteredAttended,
-    report.summary.outsideRegistrationAttended,
-    report.summary.registeredNotAttended,
-  ]);
+  ] = adjustedPercentages(paymentOutcomeCounts(report));
   const paymentReports = {
+    sameWeekRegistrations: {
+      title: "Total registrations this week",
+      value: report.summary.sameWeekRegistrations,
+      rows: report.sameWeekRegistrations || [],
+      csvPath: report.csvPaths?.sameWeekRegistrations,
+      empty: "No registrations found for this week.",
+      type: "payment",
+    },
     sameWeekRegisteredAttended: {
       title: "Registered this week and attended",
       value: countWithPercent(report.summary.sameWeekRegisteredAttended, sameWeekRegisteredAttendedPct),
@@ -379,6 +411,73 @@ function renderPaymentAttendance() {
     selected.type === "chat"
       ? buildTable(["Name", "Email", "Phone", "Chat Time", "Offset", "Message"], chatRows(selected.rows), selected.empty)
       : buildTable(paymentHeaders, paymentRows(selected.rows), selected.empty);
+}
+
+function renderHistoricalPaymentAttendance() {
+  if (!paymentAttendancePayload?.reports?.length) {
+    historicalPaymentKpisEl.innerHTML = "";
+    historicalPaymentTableEl.innerHTML = `<p class="empty">No historical payment-attendance data has been generated yet.</p>`;
+    return;
+  }
+
+  const reports = paymentAttendancePayload.reports;
+  const totals = reports.reduce(
+    (acc, report) => {
+      acc.sameWeekRegistrations += Number(report.summary?.sameWeekRegistrations || 0);
+      acc.sameWeekRegisteredAttended += Number(report.summary?.sameWeekRegisteredAttended || 0);
+      acc.priorWeekRegisteredAttended += Number(report.summary?.priorWeekRegisteredAttended || 0);
+      acc.outsideRegistrationAttended += Number(report.summary?.outsideRegistrationAttended || 0);
+      acc.registeredNotAttended += Number(report.summary?.registeredNotAttended || 0);
+      return acc;
+    },
+    {
+      sameWeekRegistrations: 0,
+      sameWeekRegisteredAttended: 0,
+      priorWeekRegisteredAttended: 0,
+      outsideRegistrationAttended: 0,
+      registeredNotAttended: 0,
+    }
+  );
+  const webinarCount = reports.length || 1;
+  const percentages = adjustedPercentages([
+    totals.sameWeekRegisteredAttended,
+    totals.priorWeekRegisteredAttended,
+    totals.outsideRegistrationAttended,
+    totals.registeredNotAttended,
+  ]);
+
+  historicalPaymentKpisEl.innerHTML = buildKpis([
+    { label: "Total registrations", value: `${totals.sameWeekRegistrations} avg ${formatAverageNumber(totals.sameWeekRegistrations / webinarCount)}` },
+    { label: "Registered same week and attended", value: `${totals.sameWeekRegisteredAttended} (${formatPercent(percentages[0])}) avg ${formatAverageNumber(totals.sameWeekRegisteredAttended / webinarCount)}` },
+    { label: "Previous-week registrants attended", value: `${totals.priorWeekRegisteredAttended} (${formatPercent(percentages[1])}) avg ${formatAverageNumber(totals.priorWeekRegisteredAttended / webinarCount)}` },
+    { label: "Attended without payment match", value: `${totals.outsideRegistrationAttended} (${formatPercent(percentages[2])}) avg ${formatAverageNumber(totals.outsideRegistrationAttended / webinarCount)}` },
+    { label: "Registered but not attended", value: `${totals.registeredNotAttended} (${formatPercent(percentages[3])}) avg ${formatAverageNumber(totals.registeredNotAttended / webinarCount)}` },
+  ]);
+
+  const rows = reports.map((report) => {
+    const rowPercentages = adjustedPercentages(paymentOutcomeCounts(report));
+    return [
+      escapeHtml(report.weekLabel || "-"),
+      escapeHtml(report.summary?.sameWeekRegistrations || 0),
+      escapeHtml(`${report.summary?.sameWeekRegisteredAttended || 0} (${formatPercent(rowPercentages[0])})`),
+      escapeHtml(`${report.summary?.priorWeekRegisteredAttended || 0} (${formatPercent(rowPercentages[1])})`),
+      escapeHtml(`${report.summary?.outsideRegistrationAttended || 0} (${formatPercent(rowPercentages[2])})`),
+      escapeHtml(`${report.summary?.registeredNotAttended || 0} (${formatPercent(rowPercentages[3])})`),
+    ];
+  });
+
+  historicalPaymentTableEl.innerHTML = buildTable(
+    [
+      "Week",
+      "Total registrations",
+      "Registered same week attended",
+      "Previous-week attended",
+      "Attended without payment match",
+      "Registered not attended",
+    ],
+    rows,
+    "No historical payment-attendance rows found."
+  );
 }
 
 function renderConversion() {
@@ -534,43 +633,74 @@ function createBarChart(series, valueKey, labelKey, isPercent = false) {
   `;
 }
 
+function fixedWebinarStartFor(dateValue) {
+  const date = new Date(dateValue || "");
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: istTimeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const get = (type) => Number(parts.find((part) => part.type === type)?.value || 0);
+  return new Date(Date.UTC(get("year"), get("month") - 1, get("day"), 13, 30, 0));
+}
+
+function buildFixedSlotSeries(payloads, fieldName) {
+  const slotMap = new Map();
+  for (const payload of payloads.filter(Boolean)) {
+    const fixedStart = fixedWebinarStartFor(payload.webinar?.startTime);
+    if (!fixedStart) {
+      continue;
+    }
+    for (const participant of payload.uniqueParticipants || []) {
+      const value = participant[fieldName];
+      if (!value) {
+        continue;
+      }
+      const eventDate = new Date(value);
+      if (Number.isNaN(eventDate.getTime()) || eventDate < fixedStart) {
+        continue;
+      }
+      const offsetMinutes = Math.floor((eventDate.getTime() - fixedStart.getTime()) / 60000);
+      const slotNumber = Math.floor(offsetMinutes / 15) + 1;
+      if (slotNumber < 1 || slotNumber > 24) {
+        continue;
+      }
+      const current = slotMap.get(slotNumber) || { slotNumber, timeLabel: formatFixedSlotLabel(slotNumber), count: 0 };
+      current.count += 1;
+      slotMap.set(slotNumber, current);
+    }
+  }
+
+  const maxSlot = Math.max(16, ...slotMap.keys());
+  return Array.from({ length: maxSlot }, (_, index) => {
+    const slotNumber = index + 1;
+    return slotMap.get(slotNumber) || { slotNumber, timeLabel: formatFixedSlotLabel(slotNumber), count: 0 };
+  });
+}
+
 function renderFifteenMinuteAnalysis(payload) {
-  const buckets = payload?.fifteenMinuteAnalysis?.buckets || [];
-  const selectedSeries = buckets.map((bucket) => ({
-    slotLabel: `Slot ${bucket.slotNumber}`,
-    timeLabel: formatShortTimeRangeLabel(bucket.timeRangeLabel),
-    permanentDropouts: bucket.permanentDropouts,
-  }));
-  chartFifteenMinuteSelectedEl.innerHTML = createBarChart(selectedSeries, "permanentDropouts", "timeLabel", false);
-  fifteenMinuteSelectedNoteEl.textContent = buckets.length
-    ? `Permanent dropouts are counted in 15-minute slots from ${formatTimeOnlyIst(payload.effectiveWindow?.startTime)} to ${formatTimeOnlyIst(payload.effectiveWindow?.endTime)}.`
-    : "No 15-minute dropout data available for this webinar.";
+  const selectedJoinSeries = buildFixedSlotSeries([payload], "firstJoinTime");
+  const selectedDropSeries = buildFixedSlotSeries([payload], "finalDropTime");
+  const historicalJoinSeries = buildFixedSlotSeries(historicalReportPayloads, "firstJoinTime");
+  const historicalDropSeries = buildFixedSlotSeries(historicalReportPayloads, "finalDropTime");
 
-  const historical = aggregatePayload?.historicalFifteenMinuteAnalysis || {};
-  const historicalBuckets = historical.buckets || [];
-  const historicalSeries = historicalBuckets.map((bucket) => ({
-    slotLabel: `Slot ${bucket.slotNumber}`,
-    timeLabel: bucket.offsetRangeLabel.replace(" min", "m"),
-    permanentDropoutPercent: bucket.permanentDropoutPercent,
-  }));
-  chartFifteenMinuteHistoricalEl.innerHTML = createBarChart(historicalSeries, "permanentDropoutPercent", "timeLabel", true);
+  chartFifteenMinuteSelectedJoinsEl.innerHTML = createBarChart(selectedJoinSeries, "count", "timeLabel", false);
+  chartFifteenMinuteSelectedDropsEl.innerHTML = createBarChart(selectedDropSeries, "count", "timeLabel", false);
+  chartFifteenMinuteHistoricalJoinsEl.innerHTML = createBarChart(historicalJoinSeries, "count", "timeLabel", false);
+  chartFifteenMinuteHistoricalDropsEl.innerHTML = createBarChart(historicalDropSeries, "count", "timeLabel", false);
 
-  if (!historicalBuckets.length) {
-    fifteenMinuteHistoricalNoteEl.textContent = "No historical 15-minute data available yet.";
-    return;
-  }
-
-  const highest = historical.highestDropSlot;
-  const lowest = historical.lowestDropSlot;
-  const parts = [];
-  if (highest) {
-    parts.push(`Highest historical drop: ${highest.offsetRangeLabel} (${formatPercent(highest.permanentDropoutPercent)})`);
-  }
-  if (lowest) {
-    parts.push(`Lowest historical drop: ${lowest.offsetRangeLabel} (${formatPercent(lowest.permanentDropoutPercent)})`);
-  }
-  parts.push("Historical percentages use only webinars that lasted into each slot.");
-  fifteenMinuteHistoricalNoteEl.textContent = parts.join(" • ");
+  fifteenMinuteSelectedNoteEl.textContent = "Unique first joins are counted in fixed 15-minute slots from 7:00 PM IST.";
+  fifteenMinuteSelectedDropNoteEl.textContent = "Final drops are counted in fixed 15-minute slots from 7:00 PM IST.";
+  fifteenMinuteHistoricalJoinNoteEl.textContent = historicalReportPayloads.length
+    ? `Historical first joins across ${historicalReportPayloads.length} webinars, using fixed 7:00 PM IST slots.`
+    : "No historical join data available yet.";
+  fifteenMinuteHistoricalNoteEl.textContent = historicalReportPayloads.length
+    ? `Historical final drops across ${historicalReportPayloads.length} webinars, using fixed 7:00 PM IST slots.`
+    : "No historical dropout data available yet.";
 }
 
 function renderAggregate() {
@@ -606,6 +736,7 @@ function render(payload) {
   renderTables(payload);
   renderFifteenMinuteAnalysis(payload);
   renderPaymentAttendance();
+  renderHistoricalPaymentAttendance();
   renderConversion();
 }
 
@@ -648,6 +779,20 @@ async function loadPaymentAttendance() {
   paymentAttendancePayload = await response.json();
 }
 
+async function loadHistoricalReportPayloads() {
+  const responses = await Promise.all(
+    webinarManifest.map(async (webinar) => {
+      try {
+        const response = await fetch(`${webinar.reportJson}?ts=${Date.now()}`);
+        return response.ok ? response.json() : null;
+      } catch {
+        return null;
+      }
+    })
+  );
+  historicalReportPayloads = responses.filter(Boolean);
+}
+
 async function loadReport(reportJsonPath) {
   const response = await fetch(`${reportJsonPath}?ts=${Date.now()}`);
   if (!response.ok) {
@@ -665,6 +810,7 @@ async function refreshCurrentReport() {
   }
   const selectedReportPath = currentReportPath;
   await Promise.all([loadAggregate(), loadPaymentAttendance()]);
+  await loadHistoricalReportPayloads();
   await loadReport(selectedReportPath);
 }
 
@@ -700,6 +846,7 @@ function attachInteractions() {
 
 async function init() {
   await Promise.all([loadManifest(), loadAggregate(), loadPaymentAttendance()]);
+  await loadHistoricalReportPayloads();
   attachInteractions();
   if (webinarManifest[0]) {
     webinarSelectEl.value = webinarManifest[0].reportJson;

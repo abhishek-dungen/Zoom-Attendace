@@ -14,7 +14,6 @@ const uniqueParticipantsTableEl = document.getElementById("uniqueParticipantsTab
 const beforeCourseTableEl = document.getElementById("beforeCourseTable");
 const afterCourseTableEl = document.getElementById("afterCourseTable");
 const stayedTillEndTableEl = document.getElementById("stayedTillEndTable");
-const paymentMethodologyEl = document.getElementById("paymentMethodology");
 const paymentKpisEl = document.getElementById("paymentKpis");
 const paymentReportTitleEl = document.getElementById("paymentReportTitle");
 const paymentReportTableEl = document.getElementById("paymentReportTable");
@@ -51,7 +50,7 @@ let webinarManifest = [];
 let aggregatePayload = null;
 let paymentAttendancePayload = null;
 let currentPayload = null;
-let activePaymentReportKey = "sameWeekRegistrations";
+let activePaymentReportKey = "sameWeekRegisteredAttended";
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -167,6 +166,26 @@ function formatAverageNumber(value) {
   return Number(value || 0).toFixed(2);
 }
 
+function countWithPercent(count, percent) {
+  return `${count} (${formatPercent(percent)})`;
+}
+
+function adjustedPercentages(counts) {
+  const total = counts.reduce((sum, count) => sum + Number(count || 0), 0);
+  if (!total) {
+    return counts.map(() => 0);
+  }
+  let used = 0;
+  return counts.map((count, index) => {
+    if (index === counts.length - 1) {
+      return Number(Math.max(0, 100 - used).toFixed(2));
+    }
+    const percent = Number(((Number(count || 0) / total) * 100).toFixed(2));
+    used += percent;
+    return percent;
+  });
+}
+
 function renderMetricText(element, count, percent) {
   element.textContent = `${count} (${formatPercent(percent)})`;
 }
@@ -274,35 +293,26 @@ function currentPaymentReport() {
 function renderPaymentAttendance() {
   const report = currentPaymentReport();
   if (!report) {
-    if (paymentMethodologyEl) {
-      paymentMethodologyEl.textContent = "No payment-attendance report has been generated for this webinar yet.";
-    }
+    paymentKpisEl.innerHTML = "";
+    paymentReportTableEl.innerHTML = `<p class="empty">No payment-attendance report has been generated for this webinar yet.</p>`;
     return;
   }
 
-  const method = paymentAttendancePayload.methodology || {};
-  const matchOrder = String(method.attendeeMatchOrder || "email, phone, name").replace(/\.$/, "");
-  paymentMethodologyEl.textContent = `${report.weekLabel}. Match order: ${matchOrder}. Attendance time uses actual Zoom join segments.`;
+  const [
+    sameWeekRegisteredAttendedPct,
+    priorWeekRegisteredAttendedPct,
+    outsideRegistrationAttendedPct,
+    registeredNotAttendedPct,
+  ] = adjustedPercentages([
+    report.summary.sameWeekRegisteredAttended,
+    report.summary.priorWeekRegisteredAttended,
+    report.summary.outsideRegistrationAttended,
+    report.summary.registeredNotAttended,
+  ]);
   const paymentReports = {
-    sameWeekRegistrations: {
-      title: "Registrations this week",
-      value: report.summary.sameWeekRegistrations,
-      rows: report.sameWeekRegistrations || [],
-      csvPath: report.csvPaths?.sameWeekRegistrations,
-      empty: "No registrations found for this week.",
-      type: "payment",
-    },
     sameWeekRegisteredAttended: {
       title: "Registered this week and attended",
-      value: report.summary.sameWeekRegisteredAttended,
-      rows: report.sameWeekRegisteredAttended || [],
-      csvPath: report.csvPaths?.sameWeekAttended,
-      empty: "No same-week registrants attended this webinar.",
-      type: "payment",
-    },
-    sameWeekAttendancePercent: {
-      title: "Attendance rate",
-      value: formatPercent(report.summary.sameWeekAttendancePercent),
+      value: countWithPercent(report.summary.sameWeekRegisteredAttended, sameWeekRegisteredAttendedPct),
       rows: report.sameWeekRegisteredAttended || [],
       csvPath: report.csvPaths?.sameWeekAttended,
       empty: "No same-week registrants attended this webinar.",
@@ -310,7 +320,7 @@ function renderPaymentAttendance() {
     },
     priorWeekRegisteredAttended: {
       title: "Previous-week registrants attended",
-      value: report.summary.priorWeekRegisteredAttended,
+      value: countWithPercent(report.summary.priorWeekRegisteredAttended, priorWeekRegisteredAttendedPct),
       rows: report.priorWeekRegisteredAttended || [],
       csvPath: report.csvPaths?.priorWeekAttended,
       empty: "No prior-week registrants attended this webinar.",
@@ -318,7 +328,7 @@ function renderPaymentAttendance() {
     },
     outsideRegistrationAttended: {
       title: "Attended without payment match",
-      value: report.summary.outsideRegistrationAttended,
+      value: countWithPercent(report.summary.outsideRegistrationAttended, outsideRegistrationAttendedPct),
       rows: report.outsideRegistrationAttended || [],
       csvPath: report.csvPaths?.outsideRegistration,
       empty: "No attendees were outside the payment gateway records.",
@@ -326,7 +336,7 @@ function renderPaymentAttendance() {
     },
     registeredNotAttended: {
       title: "Registered but not attended",
-      value: report.summary.registeredNotAttended,
+      value: countWithPercent(report.summary.registeredNotAttended, registeredNotAttendedPct),
       rows: report.registeredNotAttended || [],
       csvPath: report.csvPaths?.registeredNotAttended,
       empty: "Every same-week registrant attended at least once.",
@@ -343,7 +353,7 @@ function renderPaymentAttendance() {
   };
 
   if (!paymentReports[activePaymentReportKey]) {
-    activePaymentReportKey = "sameWeekRegistrations";
+    activePaymentReportKey = "sameWeekRegisteredAttended";
   }
 
   paymentKpisEl.innerHTML = buildKpis(
@@ -378,7 +388,7 @@ function renderConversion() {
     return;
   }
 
-  conversionMethodologyEl.textContent = "Course buyers are matched back to prior webinar-only, bundle-only, or combo registrations using the same email, phone, and normalized-name rules.";
+  conversionMethodologyEl.textContent = "Course buyers are matched back to prior webinar or combo registrations using email first, then phone number.";
   const breakdown = conversion.byRegistrationType || {};
   conversionKpisEl.innerHTML = buildKpis([
     { label: "Course purchases", value: conversion.coursePurchases || 0 },

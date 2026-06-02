@@ -156,14 +156,6 @@ function normalizePhone(value) {
   return digits.length >= 10 ? digits.slice(-10) : "";
 }
 
-function normalizeName(value) {
-  return clean(value)
-    .toLowerCase()
-    .replace(/[^a-z0-9 ]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 function amountNumber(value) {
   const number = Number(clean(value).replace(/,/g, ""));
   return Number.isFinite(number) ? number : 0;
@@ -209,14 +201,12 @@ function identityKeys(record) {
   const keys = [];
   if (record.emailKey) keys.push(`email:${record.emailKey}`);
   if (record.phoneKey) keys.push(`phone:${record.phoneKey}`);
-  if (record.nameKey && record.nameKey.length >= 5) keys.push(`name:${record.nameKey}`);
   return keys;
 }
 
 function primaryRecordKey(record) {
   if (record.emailKey) return `email:${record.emailKey}`;
   if (record.phoneKey) return `phone:${record.phoneKey}`;
-  if (record.nameKey && record.nameKey.length >= 5) return `name:${record.nameKey}`;
   return `payment:${record.source}:${record.paymentId || record.date.toISOString()}`;
 }
 
@@ -244,10 +234,8 @@ function participantIdentityKeys(participant) {
   const keys = [];
   const emailKey = normalizeEmail(participant.email);
   const phoneKey = normalizePhone(participant.phoneNumber);
-  const nameKey = normalizeName(participant.name);
   if (emailKey) keys.push({ key: `email:${emailKey}`, method: "email" });
   if (phoneKey) keys.push({ key: `phone:${phoneKey}`, method: "phone" });
-  if (nameKey && nameKey.length >= 5) keys.push({ key: `name:${nameKey}`, method: "name fallback" });
   return keys;
 }
 
@@ -268,7 +256,6 @@ function makePaymentRecord({ source, paymentId, date, status, purpose, name, ema
     classification: classify(numericAmount, purpose),
     emailKey: normalizeEmail(email),
     phoneKey: normalizePhone(phone),
-    nameKey: normalizeName(name),
   };
 }
 
@@ -408,10 +395,13 @@ function summarizeCounts(rows) {
 function dedupeReportRows(rows) {
   const byIdentity = new Map();
   for (const row of rows) {
-    const key =
-      row.paymentId && row.gateway
-        ? `payment:${row.gateway}:${row.paymentId}`
-        : `person:${normalizeEmail(row.email)}:${normalizePhone(row.phone)}:${normalizeName(row.name)}`;
+    const emailKey = normalizeEmail(row.email);
+    const phoneKey = normalizePhone(row.phone);
+    const key = emailKey
+      ? `email:${emailKey}`
+      : phoneKey
+        ? `phone:${phoneKey}`
+        : `payment:${row.gateway || ""}:${row.paymentId || ""}:${row.name || ""}`;
     const current = byIdentity.get(key);
     if (!current || Number(row.totalPresentSeconds || 0) > Number(current.totalPresentSeconds || 0)) {
       byIdentity.set(key, row);
@@ -618,7 +608,7 @@ function main() {
       paymentSources:
         "Instamojo credit CSV plus PayU captured rows plus Cashfree rows retained after removing Cashfree records marked as Instamojo backend duplicates.",
       weekDefinition: "Monday 00:00:00 IST to Sunday 23:59:59 IST, matched to the selected webinar's week.",
-      attendeeMatchOrder: "Email, then phone last 10 digits, then normalized name fallback.",
+      attendeeMatchOrder: "Email, then phone last 10 digits. Name matching is not used.",
       attendanceTime: "Uses the existing Zoom report totalPresentSeconds, which sums actual join segments instead of first-join-to-last-drop span.",
     },
     sourceFiles,

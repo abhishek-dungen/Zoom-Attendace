@@ -590,7 +590,7 @@ function buildEffectiveWebinarWindow(webinar, chatMessages, hostName) {
   let fixedStartTime = webinar.start_time || "";
   if (webinarStart) {
     const parts = new Intl.DateTimeFormat("en-GB", {
-      timeZone: timeZone,
+      timeZone: istTimeZone,
       year: "numeric",
       month: "2-digit",
       day: "2-digit",

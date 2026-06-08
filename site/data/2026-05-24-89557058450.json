@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-01T21:48:50.189Z",
+  "generatedAt": "2026-06-07T20:07:10.179Z",
   "webinar": {
     "id": 89557058450,
     "uuid": "3V+lWnapSfiXdyR4QTYhGA==",
@@ -52,123 +52,101 @@
   },
   "fifteenMinuteAnalysis": {
     "bucketMinutes": 15,
-    "bucketCount": 17,
+    "bucketCount": 16,
     "buckets": [
       {
         "slotNumber": 1,
         "startOffsetMinutes": 0,
         "endOffsetMinutes": 15,
-        "startTime": "2026-05-24T13:05:18.000Z",
-        "endTime": "2026-05-24T13:20:18.000Z",
-        "timeRangeLabel": "6:35 pm to 6:50 pm",
+        "startTime": "2026-05-24T13:30:00.000Z",
+        "endTime": "2026-05-24T13:45:00.000Z",
+        "timeRangeLabel": "7:00 pm to 7:15 pm",
         "offsetRangeLabel": "0-15 min",
-        "permanentDropouts": 0,
-        "participantKeys": []
+        "permanentDropouts": 1,
+        "participantKeys": [
+          "kousershaikh123@gmail.com"
+        ]
       },
       {
         "slotNumber": 2,
         "startOffsetMinutes": 15,
         "endOffsetMinutes": 30,
-        "startTime": "2026-05-24T13:20:18.000Z",
-        "endTime": "2026-05-24T13:35:18.000Z",
-        "timeRangeLabel": "6:50 pm to 7:05 pm",
+        "startTime": "2026-05-24T13:45:00.000Z",
+        "endTime": "2026-05-24T14:00:00.000Z",
+        "timeRangeLabel": "7:15 pm to 7:30 pm",
         "offsetRangeLabel": "15-30 min",
-        "permanentDropouts": 0,
-        "participantKeys": []
+        "permanentDropouts": 4,
+        "participantKeys": [
+          "daminirc32@gmail.com",
+          "sudhanshushekhar4290@gmail.com",
+          "priyankapriya1012@gmail.com",
+          "savitasadare@gmail.com"
+        ]
       },
       {
         "slotNumber": 3,
         "startOffsetMinutes": 30,
         "endOffsetMinutes": 45,
-        "startTime": "2026-05-24T13:35:18.000Z",
-        "endTime": "2026-05-24T13:50:18.000Z",
-        "timeRangeLabel": "7:05 pm to 7:20 pm",
+        "startTime": "2026-05-24T14:00:00.000Z",
+        "endTime": "2026-05-24T14:15:00.000Z",
+        "timeRangeLabel": "7:30 pm to 7:45 pm",
         "offsetRangeLabel": "30-45 min",
-        "permanentDropouts": 3,
+        "permanentDropouts": 9,
         "participantKeys": [
-          "sudhanshushekhar4290@gmail.com",
-          "savitasadare@gmail.com",
-          "kousershaikh123@gmail.com"
+          "mahesh737703@gmail.com",
+          "harshnagpalhn06@gmail.com",
+          "nitsworkid@gmail.com",
+          "piyushgorwa9@gmail.com",
+          "vivmint@gmail.com",
+          "jjaspirants@gmail.com",
+          "vermab202@gmail.com",
+          "gurdeepdas.25613@gmail.com",
+          "mahajanvishal9332@gmail.com"
         ]
       },
       {
         "slotNumber": 4,
         "startOffsetMinutes": 45,
         "endOffsetMinutes": 60,
-        "startTime": "2026-05-24T13:50:18.000Z",
-        "endTime": "2026-05-24T14:05:18.000Z",
-        "timeRangeLabel": "7:20 pm to 7:35 pm",
+        "startTime": "2026-05-24T14:15:00.000Z",
+        "endTime": "2026-05-24T14:30:00.000Z",
+        "timeRangeLabel": "7:45 pm to 8:00 pm",
         "offsetRangeLabel": "45-60 min",
         "permanentDropouts": 6,
         "participantKeys": [
-          "harshnagpalhn06@gmail.com",
-          "piyushgorwa9@gmail.com",
-          "daminirc32@gmail.com",
-          "priyankapriya1012@gmail.com",
-          "jjaspirants@gmail.com",
-          "gurdeepdas.25613@gmail.com"
+          "shfulzele123@gmail.com",
+          "abhishek_sindal@yahoo.in",
+          "1510shantanu@gmail.com",
+          "irshadmalik9354012223@gmail.com",
+          "sunilsain1016@rediffmail.com",
+          "mrrajeevsha@gmail.com"
         ]
       },
       {
         "slotNumber": 5,
         "startOffsetMinutes": 60,
         "endOffsetMinutes": 75,
-        "startTime": "2026-05-24T14:05:18.000Z",
-        "endTime": "2026-05-24T14:20:18.000Z",
-        "timeRangeLabel": "7:35 pm to 7:50 pm",
+        "startTime": "2026-05-24T14:30:00.000Z",
+        "endTime": "2026-05-24T14:45:00.000Z",
+        "timeRangeLabel": "8:00 pm to 8:15 pm",
         "offsetRangeLabel": "60-75 min",
-        "permanentDropouts": 8,
+        "permanentDropouts": 5,
         "participantKeys": [
-          "shfulzele123@gmail.com",
-          "mahesh737703@gmail.com",
-          "abhishek_sindal@yahoo.in",
-          "nitsworkid@gmail.com",
-          "irshadmalik9354012223@gmail.com",
-          "vivmint@gmail.com",
-          "vermab202@gmail.com",
-          "mahajanvishal9332@gmail.com"
+          "mansilahoria848@gmail.com",
+          "manish.kt65@gmail.com",
+          "mishra.siddhartha07@gmail.com",
+          "narendra05051977@gmail.com",
+          "dheerendraprataprao@gmail.com"
         ]
       },
       {
         "slotNumber": 6,
         "startOffsetMinutes": 75,
         "endOffsetMinutes": 90,
-        "startTime": "2026-05-24T14:20:18.000Z",
-        "endTime": "2026-05-24T14:35:18.000Z",
-        "timeRangeLabel": "7:50 pm to 8:05 pm",
+        "startTime": "2026-05-24T14:45:00.000Z",
+        "endTime": "2026-05-24T15:00:00.000Z",
+        "timeRangeLabel": "8:15 pm to 8:30 pm",
         "offsetRangeLabel": "75-90 min",
-        "permanentDropouts": 5,
-        "participantKeys": [
-          "manish.kt65@gmail.com",
-          "mishra.siddhartha07@gmail.com",
-          "1510shantanu@gmail.com",
-          "sunilsain1016@rediffmail.com",
-          "mrrajeevsha@gmail.com"
-        ]
-      },
-      {
-        "slotNumber": 7,
-        "startOffsetMinutes": 90,
-        "endOffsetMinutes": 105,
-        "startTime": "2026-05-24T14:35:18.000Z",
-        "endTime": "2026-05-24T14:50:18.000Z",
-        "timeRangeLabel": "8:05 pm to 8:20 pm",
-        "offsetRangeLabel": "90-105 min",
-        "permanentDropouts": 3,
-        "participantKeys": [
-          "mansilahoria848@gmail.com",
-          "narendra05051977@gmail.com",
-          "dheerendraprataprao@gmail.com"
-        ]
-      },
-      {
-        "slotNumber": 8,
-        "startOffsetMinutes": 105,
-        "endOffsetMinutes": 120,
-        "startTime": "2026-05-24T14:50:18.000Z",
-        "endTime": "2026-05-24T15:05:18.000Z",
-        "timeRangeLabel": "8:20 pm to 8:35 pm",
-        "offsetRangeLabel": "105-120 min",
         "permanentDropouts": 4,
         "participantKeys": [
           "deep.har.1991@gmail.com",
@@ -178,130 +156,143 @@
         ]
       },
       {
+        "slotNumber": 7,
+        "startOffsetMinutes": 90,
+        "endOffsetMinutes": 105,
+        "startTime": "2026-05-24T15:00:00.000Z",
+        "endTime": "2026-05-24T15:15:00.000Z",
+        "timeRangeLabel": "8:30 pm to 8:45 pm",
+        "offsetRangeLabel": "90-105 min",
+        "permanentDropouts": 0,
+        "participantKeys": []
+      },
+      {
+        "slotNumber": 8,
+        "startOffsetMinutes": 105,
+        "endOffsetMinutes": 120,
+        "startTime": "2026-05-24T15:15:00.000Z",
+        "endTime": "2026-05-24T15:30:00.000Z",
+        "timeRangeLabel": "8:45 pm to 9:00 pm",
+        "offsetRangeLabel": "105-120 min",
+        "permanentDropouts": 6,
+        "participantKeys": [
+          "dhavalparmar.dp1211@gmail.com",
+          "nik.chaudhari@gmail.com",
+          "ajatshatrupandey7850@gmail.com",
+          "niteshyadav13104@gmail.com",
+          "nitstrade@gmail.com",
+          "priyambadakhatua2015@gmail.com"
+        ]
+      },
+      {
         "slotNumber": 9,
         "startOffsetMinutes": 120,
         "endOffsetMinutes": 135,
-        "startTime": "2026-05-24T15:05:18.000Z",
-        "endTime": "2026-05-24T15:20:18.000Z",
-        "timeRangeLabel": "8:35 pm to 8:50 pm",
+        "startTime": "2026-05-24T15:30:00.000Z",
+        "endTime": "2026-05-24T15:45:00.000Z",
+        "timeRangeLabel": "9:00 pm to 9:15 pm",
         "offsetRangeLabel": "120-135 min",
-        "permanentDropouts": 0,
-        "participantKeys": []
+        "permanentDropouts": 4,
+        "participantKeys": [
+          "raahul.official36@gmail.com",
+          "manjudhruww@gmail.com",
+          "gawhernazir000@gmail.com",
+          "dhananjay2332311983@gmail.com"
+        ]
       },
       {
         "slotNumber": 10,
         "startOffsetMinutes": 135,
         "endOffsetMinutes": 150,
-        "startTime": "2026-05-24T15:20:18.000Z",
-        "endTime": "2026-05-24T15:35:18.000Z",
-        "timeRangeLabel": "8:50 pm to 9:05 pm",
+        "startTime": "2026-05-24T15:45:00.000Z",
+        "endTime": "2026-05-24T16:00:00.000Z",
+        "timeRangeLabel": "9:15 pm to 9:30 pm",
         "offsetRangeLabel": "135-150 min",
-        "permanentDropouts": 9,
+        "permanentDropouts": 5,
         "participantKeys": [
-          "manjudhruww@gmail.com",
-          "dhavalparmar.dp1211@gmail.com",
-          "gawhernazir000@gmail.com",
-          "nik.chaudhari@gmail.com",
-          "ajatshatrupandey7850@gmail.com",
-          "niteshyadav13104@gmail.com",
-          "nitstrade@gmail.com",
-          "dhananjay2332311983@gmail.com",
-          "priyambadakhatua2015@gmail.com"
+          "teachscap922@gmail.com",
+          "sandipmagdum92@gmail.com",
+          "dubai910324@gmail.com",
+          "savita6666@gmail.com",
+          "tejasvisingh9a@gmail.com"
         ]
       },
       {
         "slotNumber": 11,
         "startOffsetMinutes": 150,
         "endOffsetMinutes": 165,
-        "startTime": "2026-05-24T15:35:18.000Z",
-        "endTime": "2026-05-24T15:50:18.000Z",
-        "timeRangeLabel": "9:05 pm to 9:20 pm",
+        "startTime": "2026-05-24T16:00:00.000Z",
+        "endTime": "2026-05-24T16:15:00.000Z",
+        "timeRangeLabel": "9:30 pm to 9:45 pm",
         "offsetRangeLabel": "150-165 min",
-        "permanentDropouts": 4,
+        "permanentDropouts": 2,
         "participantKeys": [
-          "sandipmagdum92@gmail.com",
-          "raahul.official36@gmail.com",
-          "savita6666@gmail.com",
-          "tejasvisingh9a@gmail.com"
+          "shreyashettymuniyal@gmail.com",
+          "sunildbcrpf@gmail.com"
         ]
       },
       {
         "slotNumber": 12,
         "startOffsetMinutes": 165,
         "endOffsetMinutes": 180,
-        "startTime": "2026-05-24T15:50:18.000Z",
-        "endTime": "2026-05-24T16:05:18.000Z",
-        "timeRangeLabel": "9:20 pm to 9:35 pm",
+        "startTime": "2026-05-24T16:15:00.000Z",
+        "endTime": "2026-05-24T16:30:00.000Z",
+        "timeRangeLabel": "9:45 pm to 10:00 pm",
         "offsetRangeLabel": "165-180 min",
-        "permanentDropouts": 3,
+        "permanentDropouts": 2,
         "participantKeys": [
-          "teachscap922@gmail.com",
-          "dubai910324@gmail.com",
-          "sunildbcrpf@gmail.com"
+          "avinash.borade@gmail.com",
+          "kalyan2k@gmail.com"
         ]
       },
       {
         "slotNumber": 13,
         "startOffsetMinutes": 180,
         "endOffsetMinutes": 195,
-        "startTime": "2026-05-24T16:05:18.000Z",
-        "endTime": "2026-05-24T16:20:18.000Z",
-        "timeRangeLabel": "9:35 pm to 9:50 pm",
+        "startTime": "2026-05-24T16:30:00.000Z",
+        "endTime": "2026-05-24T16:45:00.000Z",
+        "timeRangeLabel": "10:00 pm to 10:15 pm",
         "offsetRangeLabel": "180-195 min",
-        "permanentDropouts": 3,
+        "permanentDropouts": 2,
         "participantKeys": [
-          "avinash.borade@gmail.com",
-          "shreyashettymuniyal@gmail.com",
-          "kalyan2k@gmail.com"
+          "priyanshuyadav31014@gmail.com",
+          "sankarnayak111222@gmail.com"
         ]
       },
       {
         "slotNumber": 14,
         "startOffsetMinutes": 195,
         "endOffsetMinutes": 210,
-        "startTime": "2026-05-24T16:20:18.000Z",
-        "endTime": "2026-05-24T16:35:18.000Z",
-        "timeRangeLabel": "9:50 pm to 10:05 pm",
+        "startTime": "2026-05-24T16:45:00.000Z",
+        "endTime": "2026-05-24T17:00:00.000Z",
+        "timeRangeLabel": "10:15 pm to 10:30 pm",
         "offsetRangeLabel": "195-210 min",
-        "permanentDropouts": 0,
-        "participantKeys": []
+        "permanentDropouts": 1,
+        "participantKeys": [
+          "deepti2662@gmail.com"
+        ]
       },
       {
         "slotNumber": 15,
         "startOffsetMinutes": 210,
         "endOffsetMinutes": 225,
-        "startTime": "2026-05-24T16:35:18.000Z",
-        "endTime": "2026-05-24T16:50:18.000Z",
-        "timeRangeLabel": "10:05 pm to 10:20 pm",
+        "startTime": "2026-05-24T17:00:00.000Z",
+        "endTime": "2026-05-24T17:15:00.000Z",
+        "timeRangeLabel": "10:30 pm to 10:45 pm",
         "offsetRangeLabel": "210-225 min",
-        "permanentDropouts": 3,
-        "participantKeys": [
-          "deepti2662@gmail.com",
-          "priyanshuyadav31014@gmail.com",
-          "sankarnayak111222@gmail.com"
-        ]
-      },
-      {
-        "slotNumber": 16,
-        "startOffsetMinutes": 225,
-        "endOffsetMinutes": 240,
-        "startTime": "2026-05-24T16:50:18.000Z",
-        "endTime": "2026-05-24T17:05:18.000Z",
-        "timeRangeLabel": "10:20 pm to 10:35 pm",
-        "offsetRangeLabel": "225-240 min",
         "permanentDropouts": 1,
         "participantKeys": [
           "anil.kr14@gmail.com"
         ]
       },
       {
-        "slotNumber": 17,
-        "startOffsetMinutes": 240,
-        "endOffsetMinutes": 253,
-        "startTime": "2026-05-24T17:05:18.000Z",
+        "slotNumber": 16,
+        "startOffsetMinutes": 225,
+        "endOffsetMinutes": 229,
+        "startTime": "2026-05-24T17:15:00.000Z",
         "endTime": "2026-05-24T17:19:01.000Z",
-        "timeRangeLabel": "10:35 pm to 10:49 pm",
-        "offsetRangeLabel": "240-253 min",
+        "timeRangeLabel": "10:45 pm to 10:49 pm",
+        "offsetRangeLabel": "225-229 min",
         "permanentDropouts": 0,
         "participantKeys": []
       }
